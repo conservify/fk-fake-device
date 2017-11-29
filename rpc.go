@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "github.com/conservify/fk-app-protocol"
+	pb "github.com/fieldkit/app-protocol"
 	"github.com/golang/protobuf/proto"
 	"log"
 	"net"

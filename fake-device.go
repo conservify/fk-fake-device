@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	pb "github.com/conservify/fk-app-protocol"
+	pb "github.com/fieldkit/app-protocol"
 	"log"
 	"net"
 	"os/exec"
