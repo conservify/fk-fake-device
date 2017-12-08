@@ -3,6 +3,7 @@ package main
 import (
 	pb "github.com/fieldkit/app-protocol"
 	"log"
+	"math/rand"
 	"time"
 )
 
@@ -85,6 +86,41 @@ func rpcQueryDataSets(rc *rpcContext, wireQuery *pb.WireMessageQuery) error {
 					Size:   100,
 					Time:   uint64(time.Now().Unix()),
 					Hash:   0,
+				},
+			},
+		},
+	}
+	rc.writeMessage(wireReply)
+
+	return nil
+}
+
+func rpcQueryLiveData(rc *rpcContext, wireQuery *pb.WireMessageQuery) error {
+	log.Printf("Handling %v", wireQuery.QueryDataSets)
+
+	wireReply := &pb.WireMessageReply{
+		Type: pb.ReplyType_REPLY_LIVE_DATA_POLL,
+		LiveData: &pb.LiveData{
+			Samples: []*pb.LiveDataSample{
+				&pb.LiveDataSample{
+					Sensor: 0,
+					Time:   uint64(time.Now().Unix()),
+					Value:  float32(rand.NormFloat64()*3000 + 200),
+				},
+				&pb.LiveDataSample{
+					Sensor: 1,
+					Time:   uint64(time.Now().Unix()),
+					Value:  float32(rand.NormFloat64()*32 + 8),
+				},
+				&pb.LiveDataSample{
+					Sensor: 2,
+					Time:   uint64(time.Now().Unix()),
+					Value:  float32(rand.NormFloat64()*300 + 50),
+				},
+				&pb.LiveDataSample{
+					Sensor: 3,
+					Time:   uint64(time.Now().Unix()),
+					Value:  0, // float32(rand.NormFloat64()*5 + 2),
 				},
 			},
 		},
