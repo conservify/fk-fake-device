@@ -1,10 +1,18 @@
-all: fake-device
+GOARCH ?= amd64
+GOOS ?= linux
+GO ?= env GOOS=$(GOOS) GOARCH=$(GOARCH) go
+BUILD ?= $(abspath build)
+BUILDARCH ?= $(BUILD)/$(GOOS)-$(GOARCH)
 
-fake-device: *.go
-	go build -o fake-device *.go
+all:
+	GOOS=linux GOARCH=amd64 $(MAKE) binaries-all
+	GOOS=linux GOARCH=arm $(MAKE) binaries-all
+	GOOS=darwin GOARCH=amd64 $(MAKE) binaries-all
 
-run: fake-device
-	./fake-device
+binaries-all: $(BUILDARCH)/fake-device
+
+$(BUILDARCH)/fake-device: *.go
+	$(GO) build -o $(BUILDARCH)/fake-device *.go
 
 clean:
-	rm -f fake-device
+	rm -rf $(BUILD)

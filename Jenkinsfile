@@ -15,7 +15,7 @@ timestamps {
         }
 
         stage ('archive') {
-            archiveArtifacts "fake-device"
+            archiveArtifacts "build/*/fake-device"
         }
     }
 }
