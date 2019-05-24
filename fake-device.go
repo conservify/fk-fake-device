@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	pb "github.com/fieldkit/app-protocol"
 	"log"
 	"net"
 	"os/exec"
 	"strconv"
 	"time"
+
+	pb "github.com/fieldkit/app-protocol"
 )
 
 const (
@@ -93,8 +94,6 @@ func main() {
 
 	rd := newRpcDispatcher()
 	rd.AddHandler(pb.QueryType_QUERY_CAPABILITIES, rpcQueryCapabilities)
-	rd.AddHandler(pb.QueryType_QUERY_DATA_SETS, rpcQueryDataSets)
-	rd.AddHandler(pb.QueryType_QUERY_LIVE_DATA_POLL, rpcQueryLiveData)
 
 	log.Printf("Listening on %d\n", PORT)
 	for {
