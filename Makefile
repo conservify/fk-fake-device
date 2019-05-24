@@ -1,3 +1,5 @@
+all: fake-device
+
 fake-device: *.go
 	go build -o fake-device *.go
 
