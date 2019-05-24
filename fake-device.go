@@ -1,18 +1,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"os/exec"
 	"strconv"
 	"time"
 
-	pb "github.com/fieldkit/app-protocol"
-)
+	"github.com/golang/protobuf/proto"
 
-const (
-	PORT = 12345
+	pb "github.com/fieldkit/app-protocol"
 )
 
 func publishAddressOverMdns() {
@@ -23,7 +23,7 @@ func publishAddressOverMdns() {
 		cmd := []string{
 			"avahi-publish-address",
 			"-Rv",
-			"noaa-ctd.local",
+			"fk.local",
 			lanIp.String(),
 		}
 		log.Printf("Command: %v", cmd)
@@ -74,37 +74,81 @@ func publishAddressOverUdp() {
 		if err != nil {
 			log.Printf("Error %v", err)
 		}
+
 		time.Sleep(1 * time.Second)
 
 		i++
 	}
 }
 
-func main() {
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", PORT))
+func writeFile(fn string, msg proto.Message) error {
+	data, err := proto.Marshal(msg)
 	if err != nil {
-		log.Fatalf("Error listening:" + err.Error())
+		return err
 	}
 
-	defer l.Close()
+	buf := proto.NewBuffer(make([]byte, 0))
+	buf.EncodeRawBytes(data)
+
+	err = ioutil.WriteFile(fn, buf.Bytes(), 0644)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Wrote %s...", fn)
+
+	return nil
+}
+
+func writeQueries() {
+	writeFile("query-caps.bin", &pb.WireMessageQuery{
+		Type: pb.QueryType_QUERY_CAPABILITIES,
+	})
+	writeFile("query-status.bin", &pb.WireMessageQuery{
+		Type: pb.QueryType_QUERY_STATUS,
+	})
+	writeFile("query-files.bin", &pb.WireMessageQuery{
+		Type: pb.QueryType_QUERY_FILES,
+	})
+}
+
+type options struct {
+	WriteQueries bool
+}
+
+func main() {
+	o := options{}
+
+	flag.BoolVar(&o.WriteQueries, "write-queries", false, "")
+
+	flag.Parse()
+
+	if o.WriteQueries {
+		log.Printf("Writing sample query files...")
+
+		writeQueries()
+	}
 
 	go publishAddressOverMdns()
-
 	go publishAddressOverUdp()
 
-	rd := newRpcDispatcher()
-	rd.AddHandler(pb.QueryType_QUERY_CAPABILITIES, rpcQueryCapabilities)
+	dispatcher := newDispatcher()
+	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
+	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
+	dispatcher.AddHandler(pb.QueryType_QUERY_FILES, handleQueryFiles)
 
-	log.Printf("Listening on %d\n", PORT)
+	hs, err := newHttpServer(dispatcher)
+	if err != nil {
+		panic(err)
+	}
+	defer hs.Close()
+	ts, err := newTcpServer(dispatcher)
+	if err != nil {
+		panic(err)
+	}
+	defer ts.Close()
+
 	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Printf("Error accepting: " + err.Error())
-			time.Sleep(1 * time.Second)
-		}
-
-		log.Printf("New connection...")
-
-		go rd.handleRequest(conn)
+		time.Sleep(1 * time.Second)
 	}
 }

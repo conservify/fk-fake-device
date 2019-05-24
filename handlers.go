@@ -1,19 +1,17 @@
 package main
 
 import (
-	"log"
+	"context"
 
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func rpcQueryCapabilities(rc *rpcContext, wireQuery *pb.WireMessageQuery) error {
-	log.Printf("Handling %v", wireQuery.QueryCapabilities)
-
-	wireReply := &pb.WireMessageReply{
+func handleQueryCapabilities(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error) {
+	reply = &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_CAPABILITIES,
 		Capabilities: &pb.Capabilities{
 			Version: 0x1,
-			Name:    "NOAA-CTD",
+			Name:    "FieldKit Station",
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Id:            0,
@@ -42,7 +40,31 @@ func rpcQueryCapabilities(rc *rpcContext, wireQuery *pb.WireMessageQuery) error 
 			},
 		},
 	}
-	rc.writeMessage(wireReply)
 
-	return nil
+	return
+}
+
+func handleQueryStatus(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error) {
+	reply = &pb.WireMessageReply{
+		Type:   pb.ReplyType_REPLY_STATUS,
+		Status: &pb.DeviceStatus{},
+	}
+
+	return
+}
+
+func handleQueryFiles(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error) {
+	reply = &pb.WireMessageReply{
+		Type: pb.ReplyType_REPLY_FILES,
+		Files: &pb.Files{
+			Files: []*pb.File{
+				&pb.File{},
+				&pb.File{},
+				&pb.File{},
+				&pb.File{},
+			},
+		},
+	}
+
+	return
 }
