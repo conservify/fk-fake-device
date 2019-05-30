@@ -1,0 +1,4 @@
+github.com/fieldkit/app-protocol v0.0.0-20190423013407-4abafda401d8 h1:w8eNRhPNh2h7vFURedHD3gGOucFvs0FPKq7YPPHVRhE=
+github.com/fieldkit/app-protocol v0.0.0-20190423013407-4abafda401d8/go.mod h1:jjIhpGgqXVZNxQS1wo1dfxesz3oi/lQcxqmPQsdJCVA=
+github.com/golang/protobuf v1.3.1 h1:YF8+flBXS5eO826T4nzqPrxfhQThhXl0YzfuUPu4SBg=
+github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
