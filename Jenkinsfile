@@ -11,7 +11,9 @@ timestamps {
         }
 
         stage ('build') {
-            sh "make clean all"
+            withEnv(["PATH+GOLANG=${tool 'golang-amd64'}/bin"]) {
+                sh "make clean all"
+            }
         }
 
         stage ('archive') {
