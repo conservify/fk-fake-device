@@ -69,6 +69,9 @@ func ReadLengthPrefixedCollection(ctx context.Context, maximumMessageLength uint
 		}
 
 		pb, err := f(messageBuf)
+		if io.EOF == err {
+			return pbs, position, nil
+		}
 		if nil != err {
 			return nil, position, fmt.Errorf("Error handling raw message (position = %d) (%v)", position, err)
 		}

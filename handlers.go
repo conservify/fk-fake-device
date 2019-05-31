@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 
+	"github.com/golang/protobuf/proto"
+
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func handleQueryCapabilities(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error) {
-	reply = &pb.WireMessageReply{
+func handleQueryCapabilities(ctx context.Context, rw replyWriter) (err error) {
+	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_CAPABILITIES,
 		Capabilities: &pb.Capabilities{
 			Version: 0x1,
@@ -41,20 +43,24 @@ func handleQueryCapabilities(ctx context.Context, wireQuery *pb.WireMessageQuery
 		},
 	}
 
+	_, err = rw.WriteReply(reply)
+
 	return
 }
 
-func handleQueryStatus(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error) {
-	reply = &pb.WireMessageReply{
+func handleQueryStatus(ctx context.Context, rw replyWriter) (err error) {
+	reply := &pb.WireMessageReply{
 		Type:   pb.ReplyType_REPLY_STATUS,
 		Status: &pb.DeviceStatus{},
 	}
 
+	_, err = rw.WriteReply(reply)
+
 	return
 }
 
-func handleQueryFiles(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error) {
-	reply = &pb.WireMessageReply{
+func handleQueryFiles(ctx context.Context, rw replyWriter) (err error) {
+	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_FILES,
 		Files: &pb.Files{
 			Files: []*pb.File{
@@ -65,6 +71,41 @@ func handleQueryFiles(ctx context.Context, wireQuery *pb.WireMessageQuery) (repl
 			},
 		},
 	}
+
+	_, err = rw.WriteReply(reply)
+
+	return
+}
+
+func handleDownloadFile(ctx context.Context, rw replyWriter) (err error) {
+	size := 0
+	required := 10 * 1024 * 1024
+	body := proto.NewBuffer(make([]byte, 0))
+
+	for size < required {
+		reply := &pb.WireMessageReply{
+			Type: pb.ReplyType_REPLY_DOWNLOAD_FILE,
+			FileData: &pb.FileData{
+				Size: uint32(size),
+			},
+		}
+
+		body.EncodeMessage(reply)
+
+		size = len(body.Bytes())
+	}
+
+	rw.Prepare(size)
+
+	reply := &pb.WireMessageReply{
+		Type: pb.ReplyType_REPLY_DOWNLOAD_FILE,
+		FileData: &pb.FileData{
+			Size: uint32(len(body.Bytes())),
+		},
+	}
+
+	rw.WriteReply(reply)
+	rw.WriteBytes(body.Bytes())
 
 	return
 }

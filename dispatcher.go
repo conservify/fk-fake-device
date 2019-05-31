@@ -6,7 +6,13 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-type apiHandler func(ctx context.Context, wireQuery *pb.WireMessageQuery) (reply *pb.WireMessageReply, err error)
+type replyWriter interface {
+	Prepare(size int) error
+	WriteReply(reply *pb.WireMessageReply) (int, error)
+	WriteBytes(bytes []byte) (int, error)
+}
+
+type apiHandler func(ctx context.Context, reply replyWriter) (err error)
 
 type dispatcher struct {
 	handlers map[pb.QueryType]apiHandler

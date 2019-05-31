@@ -110,6 +110,9 @@ func writeQueries() {
 	writeFile("query-files.bin", &pb.WireMessageQuery{
 		Type: pb.QueryType_QUERY_FILES,
 	})
+	writeFile("query-download-file.bin", &pb.WireMessageQuery{
+		Type: pb.QueryType_QUERY_DOWNLOAD_FILE,
+	})
 }
 
 type options struct {
@@ -136,6 +139,7 @@ func main() {
 	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
 	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
 	dispatcher.AddHandler(pb.QueryType_QUERY_FILES, handleQueryFiles)
+	dispatcher.AddHandler(pb.QueryType_QUERY_DOWNLOAD_FILE, handleDownloadFile)
 
 	hs, err := newHttpServer(dispatcher)
 	if err != nil {

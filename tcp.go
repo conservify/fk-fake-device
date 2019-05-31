@@ -16,6 +16,10 @@ const (
 	PORT = 12345
 )
 
+type tcpReplyWriter struct {
+	c net.Conn
+}
+
 type tcpServer struct {
 	dispatcher *dispatcher
 	listener   net.Listener
@@ -56,14 +60,14 @@ func newTcpServer(dispatcher *dispatcher) (*tcpServer, error) {
 func (ts *tcpServer) handle(ctx context.Context, c net.Conn) {
 	defer c.Close()
 
-	rc := &rpcContext{
+	rc := &rpcReplyWriter{
 		c: c,
 	}
 
 	wireQuery := &pb.WireMessageQuery{}
-	err := rc.readMessage(wireQuery)
+	err := rc.ReadMessage(wireQuery)
 	if err != nil {
-		rc.writeError("Error reading message.")
+		rc.WriteError("Error reading message.")
 		log.Printf("Error reading: %v", err.Error())
 		return
 	}
@@ -72,19 +76,17 @@ func (ts *tcpServer) handle(ctx context.Context, c net.Conn) {
 
 	handler := ts.dispatcher.handlers[wireQuery.Type]
 	if handler == nil {
-		rc.writeError("Unknown message.")
+		rc.WriteError("Unknown message.")
 		log.Printf("Error handling RPC %v", "No handler")
 		return
 	}
 
-	reply, err := handler(ctx, wireQuery)
+	err = handler(ctx, rc)
 	if err != nil {
-		rc.writeError("Error handling message.")
+		rc.WriteError("Error handling message.")
 		log.Printf("Error handling RPC %v", err.Error())
 		return
 	}
-
-	rc.writeMessage(reply)
 
 	log.Printf("Done")
 }
@@ -93,11 +95,12 @@ func (ts *tcpServer) Close() {
 	ts.listener.Close()
 }
 
-type rpcContext struct {
-	c net.Conn
+type rpcReplyWriter struct {
+	size int
+	c    net.Conn
 }
 
-func (rc *rpcContext) readMessage(m proto.Message) error {
+func (rc *rpcReplyWriter) ReadMessage(m proto.Message) error {
 	data := make([]byte, 1024)
 	length, err := rc.c.Read(data)
 	if err != nil {
@@ -119,24 +122,30 @@ func (rc *rpcContext) readMessage(m proto.Message) error {
 	return nil
 }
 
-func (rc *rpcContext) writeMessage(m proto.Message) error {
-	data, err := proto.Marshal(m)
-	if err != nil {
-		return err
-	}
-
-	buf := proto.NewBuffer(make([]byte, 0))
-	buf.EncodeRawBytes(data)
-
-	_, err = rc.c.Write(buf.Bytes())
-	if err != nil {
-		return err
-	}
+func (rw *rpcReplyWriter) Prepare(size int) error {
+	rw.size = size
 
 	return nil
 }
 
-func (rc *rpcContext) writeError(message string) error {
+func (rw *rpcReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
+	data, err := proto.Marshal(m)
+	if err != nil {
+		return 0, err
+	}
+
+	buf := proto.NewBuffer(make([]byte, 0))
+
+	buf.EncodeRawBytes(data)
+
+	return rw.WriteBytes(buf.Bytes())
+}
+
+func (rw *rpcReplyWriter) WriteBytes(bytes []byte) (int, error) {
+	return rw.c.Write(bytes)
+}
+
+func (rw *rpcReplyWriter) WriteError(message string) (int, error) {
 	wireReply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_ERROR,
 		Errors: []*pb.Error{
@@ -145,7 +154,6 @@ func (rc *rpcContext) writeError(message string) error {
 			},
 		},
 	}
-	rc.writeMessage(wireReply)
 
-	return nil
+	return rw.WriteReply(wireReply)
 }
