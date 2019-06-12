@@ -23,7 +23,7 @@ func newHttpServer(dispatcher *dispatcher) (*httpServer, error) {
 
 	http.Handle("/fk/v1", hs)
 
-	go http.ListenAndServe(":2382", nil)
+	go http.ListenAndServe(":2382", hs)
 
 	log.Printf("(http) Listening on 2382")
 
