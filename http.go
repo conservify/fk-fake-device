@@ -23,15 +23,18 @@ func newHttpServer(dispatcher *dispatcher) (*httpServer, error) {
 
 	http.Handle("/fk/v1", hs)
 
-	go http.ListenAndServe(":2382", hs)
+	go http.ListenAndServe(":2380", hs)
+	log.Printf("(http) Listening on 2380")
 
-	log.Printf("(http) Listening on 2382")
+	go http.ListenAndServeTLS(":2382", "server_dev.crt", "server_dev.key", hs)
+	log.Printf("(https) Listening on 2382")
 
 	return hs, nil
 }
 
 func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
+	log.Printf("(http) Request: %v", req)
 
 	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, req.Body, func(bytes []byte) (m proto.Message, err error) {
 		rw := &httpReplyWriter{
