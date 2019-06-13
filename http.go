@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log"
@@ -34,11 +35,23 @@ func newHttpServer(dispatcher *dispatcher) (*httpServer, error) {
 
 func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
+
 	log.Printf("(http) Request: %v", req)
 
-	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, req.Body, func(bytes []byte) (m proto.Message, err error) {
+	contentType := req.Header.Get("Content-Type")
+
+	var reader io.Reader = req.Body
+
+	/* Hack to support hex encoded encoding. */
+	hexEncoding := contentType == "text/plain"
+	if hexEncoding {
+		reader = hex.NewDecoder(req.Body)
+	}
+
+	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
 		rw := &httpReplyWriter{
-			res: res,
+			hexEncoding: hexEncoding,
+			res:         res,
 		}
 
 		buf := proto.NewBuffer(bytes)
@@ -75,9 +88,10 @@ func (hs *httpServer) Close() {
 }
 
 type httpReplyWriter struct {
-	headers bool
-	size    int
-	res     http.ResponseWriter
+	hexEncoding bool
+	headers     bool
+	size        int
+	res         http.ResponseWriter
 }
 
 func (rw *httpReplyWriter) writeHeaders() error {
@@ -103,12 +117,14 @@ func (rw *httpReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
 	}
 
 	buf := proto.NewBuffer(make([]byte, 0))
-
 	buf.EncodeRawBytes(data)
-
 	bytes := buf.Bytes()
 
-	rw.size += len(bytes)
+	if rw.hexEncoding {
+		rw.size += hex.EncodedLen(len(bytes)) /* This is just N * 2 */
+	} else {
+		rw.size += len(bytes)
+	}
 
 	rw.writeHeaders()
 
@@ -116,6 +132,10 @@ func (rw *httpReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
 }
 
 func (rw *httpReplyWriter) WriteBytes(bytes []byte) (int, error) {
+	if rw.hexEncoding {
+		writer := hex.NewEncoder(rw.res)
+		return writer.Write(bytes)
+	}
 	return rw.res.Write(bytes)
 }
 
