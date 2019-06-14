@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/grandcat/zeroconf"
@@ -141,14 +142,14 @@ func writeQueries() {
 
 type options struct {
 	WriteQueries bool
-	Name         string
+	Names        string
 }
 
 func main() {
 	o := options{}
 
 	flag.BoolVar(&o.WriteQueries, "write-queries", false, "")
-	flag.StringVar(&o.Name, "name", "fake-device", "")
+	flag.StringVar(&o.Names, "names", "fake0", "")
 
 	flag.Parse()
 
@@ -163,9 +164,12 @@ func main() {
 		go publishAddressOverUdp()
 	}
 
-	zcServer := publishAddressOverZeroConf(o.Name)
+	names := strings.Split(o.Names, ",")
 
-	defer zcServer.Shutdown()
+	for _, name := range names {
+		zcServer := publishAddressOverZeroConf(name)
+		defer zcServer.Shutdown()
+	}
 
 	dispatcher := newDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
