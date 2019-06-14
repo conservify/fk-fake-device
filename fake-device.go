@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/grandcat/zeroconf"
+
 	"github.com/golang/protobuf/proto"
 
 	pb "github.com/fieldkit/app-protocol"
@@ -81,6 +83,24 @@ func publishAddressOverUdp() {
 	}
 }
 
+func publishAddressOverZeroConf() {
+	name := "fk-fake-device"
+	serviceType := "_fk._tcp"
+
+	server, err := zeroconf.Register(name, serviceType, "local.", PORT, []string{"txtv=0", "lo=1", "la=2"}, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("Registered ZeroConf: %v %v", name, serviceType)
+
+	defer server.Shutdown()
+
+	for {
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func writeFile(fn string, msg proto.Message) error {
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -132,8 +152,12 @@ func main() {
 		writeQueries()
 	}
 
-	go publishAddressOverMdns()
-	go publishAddressOverUdp()
+	if false {
+		go publishAddressOverMdns()
+		go publishAddressOverUdp()
+	}
+
+	go publishAddressOverZeroConf()
 
 	dispatcher := newDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
