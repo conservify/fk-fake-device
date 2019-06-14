@@ -70,7 +70,7 @@ func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = handler(ctx, rw)
+		err = handler(ctx, wireQuery, rw)
 		if err != nil {
 			rw.WriteError("Error handling message.")
 			log.Printf("Error handling RPC %v", err.Error())

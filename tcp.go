@@ -81,7 +81,7 @@ func (ts *tcpServer) handle(ctx context.Context, c net.Conn) {
 		return
 	}
 
-	err = handler(ctx, rc)
+	err = handler(ctx, wireQuery, rc)
 	if err != nil {
 		rc.WriteError("Error handling message.")
 		log.Printf("Error handling RPC %v", err.Error())

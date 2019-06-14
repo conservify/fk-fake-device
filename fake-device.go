@@ -133,6 +133,13 @@ func writeQueries() {
 	writeFile("query-download-file.bin", &pb.WireMessageQuery{
 		Type: pb.QueryType_QUERY_DOWNLOAD_FILE,
 	})
+	writeFile("query-rename.bin", &pb.WireMessageQuery{
+		Type: pb.QueryType_QUERY_CONFIGURE_IDENTITY,
+		Identity: &pb.Identity{
+			Device: "My Fancy Station",
+			Stream: "",
+		},
+	})
 }
 
 type options struct {
@@ -164,6 +171,7 @@ func main() {
 	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
 	dispatcher.AddHandler(pb.QueryType_QUERY_FILES, handleQueryFiles)
 	dispatcher.AddHandler(pb.QueryType_QUERY_DOWNLOAD_FILE, handleDownloadFile)
+	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE_IDENTITY, handleConfigureIdentity)
 
 	hs, err := newHttpServer(dispatcher)
 	if err != nil {

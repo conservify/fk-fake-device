@@ -8,7 +8,18 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func handleQueryCapabilities(ctx context.Context, rw replyWriter) (err error) {
+type HardwareState struct {
+	Identity pb.Identity
+}
+
+var state = HardwareState{
+	Identity: pb.Identity{
+		Device: "Default Name",
+		Stream: "",
+	},
+}
+
+func handleQueryCapabilities(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_CAPABILITIES,
 		Capabilities: &pb.Capabilities{
@@ -48,7 +59,7 @@ func handleQueryCapabilities(ctx context.Context, rw replyWriter) (err error) {
 	return
 }
 
-func handleQueryStatus(ctx context.Context, rw replyWriter) (err error) {
+func handleQueryStatus(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type:   pb.ReplyType_REPLY_STATUS,
 		Status: &pb.DeviceStatus{},
@@ -59,7 +70,7 @@ func handleQueryStatus(ctx context.Context, rw replyWriter) (err error) {
 	return
 }
 
-func handleQueryFiles(ctx context.Context, rw replyWriter) (err error) {
+func handleQueryFiles(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_FILES,
 		Files: &pb.Files{
@@ -77,7 +88,7 @@ func handleQueryFiles(ctx context.Context, rw replyWriter) (err error) {
 	return
 }
 
-func handleDownloadFile(ctx context.Context, rw replyWriter) (err error) {
+func handleDownloadFile(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	size := 0
 	required := 10 * 1024 * 1024
 	body := proto.NewBuffer(make([]byte, 0))
@@ -106,6 +117,20 @@ func handleDownloadFile(ctx context.Context, rw replyWriter) (err error) {
 
 	rw.WriteReply(reply)
 	rw.WriteBytes(body.Bytes())
+
+	return
+}
+
+func handleConfigureIdentity(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+	state.Identity.Device = query.Identity.Device
+	state.Identity.Stream = query.Identity.Stream
+
+	reply := &pb.WireMessageReply{
+		Type:     pb.ReplyType_REPLY_IDENTITY,
+		Identity: &state.Identity,
+	}
+
+	_, err = rw.WriteReply(reply)
 
 	return
 }

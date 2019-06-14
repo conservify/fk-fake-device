@@ -12,7 +12,7 @@ type replyWriter interface {
 	WriteBytes(bytes []byte) (int, error)
 }
 
-type apiHandler func(ctx context.Context, reply replyWriter) (err error)
+type apiHandler func(ctx context.Context, query *pb.WireMessageQuery, reply replyWriter) (err error)
 
 type dispatcher struct {
 	handlers map[pb.QueryType]apiHandler
