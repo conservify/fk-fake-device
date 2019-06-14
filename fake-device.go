@@ -85,8 +85,7 @@ func publishAddressOverUdp() {
 	}
 }
 
-func publishAddressOverZeroConf() *zeroconf.Server {
-	name := "fk-fake-device"
+func publishAddressOverZeroConf(name string) *zeroconf.Server {
 	serviceType := "_fk._tcp"
 
 	server, err := zeroconf.Register(name, serviceType, "local.", PORT, []string{"txtv=0", "lo=1", "la=2"}, nil)
@@ -142,12 +141,14 @@ func writeQueries() {
 
 type options struct {
 	WriteQueries bool
+	Name         string
 }
 
 func main() {
 	o := options{}
 
 	flag.BoolVar(&o.WriteQueries, "write-queries", false, "")
+	flag.StringVar(&o.Name, "name", "fake-device", "")
 
 	flag.Parse()
 
@@ -162,7 +163,7 @@ func main() {
 		go publishAddressOverUdp()
 	}
 
-	zcServer := publishAddressOverZeroConf()
+	zcServer := publishAddressOverZeroConf(o.Name)
 
 	defer zcServer.Shutdown()
 
