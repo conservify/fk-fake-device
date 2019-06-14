@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"os/exec"
+	"os/signal"
 	"strconv"
 	"time"
 
@@ -83,7 +85,7 @@ func publishAddressOverUdp() {
 	}
 }
 
-func publishAddressOverZeroConf() {
+func publishAddressOverZeroConf() *zeroconf.Server {
 	name := "fk-fake-device"
 	serviceType := "_fk._tcp"
 
@@ -94,11 +96,7 @@ func publishAddressOverZeroConf() {
 
 	log.Printf("Registered ZeroConf: %v %v", name, serviceType)
 
-	defer server.Shutdown()
-
-	for {
-		time.Sleep(1 * time.Second)
-	}
+	return server
 }
 
 func writeFile(fn string, msg proto.Message) error {
@@ -164,7 +162,9 @@ func main() {
 		go publishAddressOverUdp()
 	}
 
-	go publishAddressOverZeroConf()
+	zcServer := publishAddressOverZeroConf()
+
+	defer zcServer.Shutdown()
 
 	dispatcher := newDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
@@ -178,13 +178,18 @@ func main() {
 		panic(err)
 	}
 	defer hs.Close()
+
 	ts, err := newTcpServer(dispatcher)
 	if err != nil {
 		panic(err)
 	}
 	defer ts.Close()
 
-	for {
-		time.Sleep(1 * time.Second)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	for sig := range c {
+		if sig == os.Interrupt {
+			break
+		}
 	}
 }

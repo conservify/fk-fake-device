@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -44,6 +45,10 @@ func newTcpServer(dispatcher *dispatcher) (*tcpServer, error) {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
+				ignoring := "use of closed network connection"
+				if strings.Contains(err.Error(), ignoring) {
+					break
+				}
 				log.Printf("Error accepting: " + err.Error())
 				time.Sleep(1 * time.Second)
 			}
