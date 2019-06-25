@@ -29,30 +29,48 @@ func handleQueryCapabilities(ctx context.Context, query *pb.WireMessageQuery, rw
 			Version:  0x1,
 			Name:     "FieldKit Station",
 			DeviceId: DeviceID,
+			Modules: []*pb.ModuleCapabilities{
+				&pb.ModuleCapabilities{
+					Id:   0,
+					Name: "Water Quality Module",
+				},
+				&pb.ModuleCapabilities{
+					Id:   1,
+					Name: "Water Quality Module",
+				},
+				&pb.ModuleCapabilities{
+					Id:   2,
+					Name: "Ocea Module",
+				},
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Id:            0,
 					Name:          "Conductivity",
 					UnitOfMeasure: "µS/cm",
 					Frequency:     60,
+					Module:        0,
 				},
 				&pb.SensorCapabilities{
 					Id:            1,
 					Name:          "Temperature",
 					UnitOfMeasure: "C",
 					Frequency:     60,
+					Module:        1,
 				},
 				&pb.SensorCapabilities{
 					Id:            2,
 					Name:          "Depth",
 					UnitOfMeasure: "m",
 					Frequency:     60,
+					Module:        2,
 				},
 				&pb.SensorCapabilities{
 					Id:            3,
 					Name:          "Hydrophone",
 					UnitOfMeasure: "",
 					Frequency:     0,
+					Module:        2,
 				},
 			},
 		},
