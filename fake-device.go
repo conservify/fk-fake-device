@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	_ "math/rand"
 	"net"
 	"os"
 	"os/exec"

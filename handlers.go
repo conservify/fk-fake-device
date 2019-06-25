@@ -8,14 +8,17 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
+var DeviceID = []byte{82, 253, 252, 7, 33, 130, 101, 79}
+
 type HardwareState struct {
 	Identity pb.Identity
 }
 
 var state = HardwareState{
 	Identity: pb.Identity{
-		Device: "Default Name",
-		Stream: "",
+		DeviceId: DeviceID,
+		Device:   "Default Name",
+		Stream:   "",
 	},
 }
 
@@ -23,8 +26,9 @@ func handleQueryCapabilities(ctx context.Context, query *pb.WireMessageQuery, rw
 	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_CAPABILITIES,
 		Capabilities: &pb.Capabilities{
-			Version: 0x1,
-			Name:    "FieldKit Station",
+			Version:  0x1,
+			Name:     "FieldKit Station",
+			DeviceId: DeviceID,
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Id:            0,
