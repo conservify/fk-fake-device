@@ -143,6 +143,17 @@ func handleDownloadFile(ctx context.Context, query *pb.WireMessageQuery, rw repl
 	return
 }
 
+func handleQueryIdentity(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+	reply := &pb.WireMessageReply{
+		Type:     pb.ReplyType_REPLY_IDENTITY,
+		Identity: &state.Identity,
+	}
+
+	_, err = rw.WriteReply(reply)
+
+	return
+}
+
 func handleConfigureIdentity(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	state.Identity.Device = query.Identity.Device
 	state.Identity.Stream = query.Identity.Stream

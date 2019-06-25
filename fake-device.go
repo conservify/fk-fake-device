@@ -178,6 +178,7 @@ func main() {
 	dispatcher.AddHandler(pb.QueryType_QUERY_FILES, handleQueryFiles)
 	dispatcher.AddHandler(pb.QueryType_QUERY_DOWNLOAD_FILE, handleDownloadFile)
 	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE_IDENTITY, handleConfigureIdentity)
+	dispatcher.AddHandler(pb.QueryType_QUERY_IDENTITY, handleQueryIdentity)
 
 	hs, err := newHttpServer(dispatcher)
 	if err != nil {
