@@ -112,8 +112,14 @@ func handleQueryFiles(ctx context.Context, query *pb.WireMessageQuery, rw replyW
 
 func handleDownloadFile(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	size := 0
-	required := 10 * 1024 * 1024
+	required := 1 * 1024 * 1024
 	body := proto.NewBuffer(make([]byte, 0))
+
+	if query.DownloadFile != nil {
+		if query.DownloadFile.Length > 0 {
+			required = int(query.DownloadFile.Length)
+		}
+	}
 
 	for size < required {
 		reply := &pb.WireMessageReply{
