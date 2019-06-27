@@ -15,20 +15,25 @@ import (
 
 type httpServer struct {
 	dispatcher *dispatcher
+	device     *FakeDevice
 }
 
-func newHttpServer(dispatcher *dispatcher) (*httpServer, error) {
+func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, error) {
 	hs := &httpServer{
 		dispatcher: dispatcher,
+		device:     device,
 	}
 
-	http.Handle("/fk/v1", hs)
+	server := http.NewServeMux()
+	server.Handle("/fk/v1", hs)
 
-	go http.ListenAndServe(":2380", hs)
-	log.Printf("(http) Listening on 2380")
+	sslPort := device.Port + 1000
 
-	go http.ListenAndServeTLS(":2382", "server_dev.crt", "server_dev.key", hs)
-	log.Printf("(https) Listening on 2382")
+	go http.ListenAndServe(fmt.Sprintf(":%d", device.Port), server)
+	log.Printf("(http) Listening on %d", device.Port)
+
+	go http.ListenAndServeTLS(fmt.Sprintf(":%d", sslPort), "server_dev.crt", "server_dev.key", server)
+	log.Printf("(https) Listening on %d", sslPort)
 
 	return hs, nil
 }
@@ -70,7 +75,7 @@ func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = handler(ctx, wireQuery, rw)
+		err = handler(ctx, hs.device, wireQuery, rw)
 		if err != nil {
 			rw.WriteError("Error handling message.")
 			log.Printf("Error handling RPC %v", err.Error())

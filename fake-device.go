@@ -1,18 +1,13 @@
 package main
 
 import (
+	"crypto/sha1"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
-	_ "math/rand"
-	"net"
 	"os"
-	"os/exec"
 	"os/signal"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/grandcat/zeroconf"
 
@@ -21,76 +16,10 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func publishAddressOverMdns() {
-	lanIp, _, err := getLanIp()
-	if err != nil {
-		log.Printf("Error finding LAN ip: %v", err)
-	} else {
-		cmd := []string{
-			"avahi-publish-address",
-			"-Rv",
-			"fk.local",
-			lanIp.String(),
-		}
-		log.Printf("Command: %v", cmd)
-
-		c := exec.Command(cmd[0], cmd[1:]...)
-		c.Run()
-	}
-}
-
-func publishAddressOverUdp() {
-	_, lanNet, err := getLanIp()
-	if err != nil {
-		log.Fatalf("Error %v", err)
-	}
-
-	a, err := lastAddr(lanNet)
-	if err != nil {
-		log.Fatalf("Error %v", err)
-	}
-
-	server, err := net.ResolveUDPAddr("udp", a.String()+":12344")
-	if err != nil {
-		log.Fatalf("Error %v", err)
-	}
-
-	local, err := net.ResolveUDPAddr("udp", ":12345")
-	if err != nil {
-		log.Fatalf("Error %v", err)
-	}
-
-	c, err := net.DialUDP("udp", local, server)
-	if err != nil {
-		log.Fatalf("Error %v", err)
-	}
-
-	defer c.Close()
-
-	i := 0
-
-	for {
-		if false {
-			fmt.Printf(".")
-		}
-
-		msg := strconv.Itoa(i)
-		buf := []byte(msg)
-		_, err = c.Write(buf)
-		if err != nil {
-			log.Printf("Error %v", err)
-		}
-
-		time.Sleep(1 * time.Second)
-
-		i++
-	}
-}
-
-func publishAddressOverZeroConf(name string) *zeroconf.Server {
+func publishAddressOverZeroConf(name string, port int) *zeroconf.Server {
 	serviceType := "_fk._tcp"
 
-	server, err := zeroconf.Register(name, serviceType, "local.", PORT, []string{"txtv=0", "lo=1", "la=2"}, nil)
+	server, err := zeroconf.Register(name, serviceType, "local.", port, []string{"txtv=0", "lo=1", "la=2"}, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -141,13 +70,65 @@ func writeQueries() {
 	})
 }
 
-type options struct {
+type Options struct {
 	WriteQueries bool
 	Names        string
 }
 
+type HardwareState struct {
+	Identity pb.Identity
+}
+
+type FakeDevice struct {
+	Name      string
+	Port      int
+	ZeroConf  *zeroconf.Server
+	WebServer *httpServer
+	State     *HardwareState
+}
+
+func (fd *FakeDevice) Start(dispatcher *dispatcher) {
+	fd.ZeroConf = publishAddressOverZeroConf(fd.Name, fd.Port)
+
+	ws, err := newHttpServer(fd, dispatcher)
+	if err != nil {
+		panic(err)
+	}
+
+	fd.WebServer = ws
+}
+
+func (fd *FakeDevice) Close() {
+	fd.ZeroConf.Shutdown()
+	fd.WebServer.Close()
+}
+
+func CreateFakeDevicesNamed(names []string) []*FakeDevice {
+	devices := make([]*FakeDevice, len(names))
+	for i, name := range names {
+		hasher := sha1.New()
+		hasher.Write([]byte(name))
+		deviceID := hasher.Sum(nil)
+
+		state := HardwareState{
+			Identity: pb.Identity{
+				DeviceId: deviceID,
+				Device:   name,
+				Stream:   "",
+			},
+		}
+
+		devices[i] = &FakeDevice{
+			Name:  name,
+			Port:  2380 + i,
+			State: &state,
+		}
+	}
+	return devices
+}
+
 func main() {
-	o := options{}
+	o := Options{}
 
 	flag.BoolVar(&o.WriteQueries, "write-queries", false, "")
 	flag.StringVar(&o.Names, "names", "fake0", "")
@@ -160,17 +141,8 @@ func main() {
 		writeQueries()
 	}
 
-	if false {
-		go publishAddressOverMdns()
-		go publishAddressOverUdp()
-	}
-
 	names := strings.Split(o.Names, ",")
-
-	for _, name := range names {
-		zcServer := publishAddressOverZeroConf(name)
-		defer zcServer.Shutdown()
-	}
+	devices := CreateFakeDevicesNamed(names)
 
 	dispatcher := newDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
@@ -180,17 +152,17 @@ func main() {
 	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE_IDENTITY, handleConfigureIdentity)
 	dispatcher.AddHandler(pb.QueryType_QUERY_IDENTITY, handleQueryIdentity)
 
-	hs, err := newHttpServer(dispatcher)
-	if err != nil {
-		panic(err)
-	}
-	defer hs.Close()
-
 	ts, err := newTcpServer(dispatcher)
 	if err != nil {
 		panic(err)
 	}
 	defer ts.Close()
+
+	for _, device := range devices {
+		device.Start(dispatcher)
+
+		defer device.Close()
+	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -199,4 +171,6 @@ func main() {
 			break
 		}
 	}
+
+	log.Printf("Stopped")
 }

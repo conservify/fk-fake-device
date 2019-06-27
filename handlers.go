@@ -8,27 +8,13 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-var DeviceID = []byte{82, 253, 252, 7, 33, 130, 101, 79}
-
-type HardwareState struct {
-	Identity pb.Identity
-}
-
-var state = HardwareState{
-	Identity: pb.Identity{
-		DeviceId: DeviceID,
-		Device:   "Default Name",
-		Stream:   "",
-	},
-}
-
-func handleQueryCapabilities(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+func handleQueryCapabilities(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_CAPABILITIES,
 		Capabilities: &pb.Capabilities{
 			Version:  0x1,
 			Name:     "FieldKit Station",
-			DeviceId: DeviceID,
+			DeviceId: device.State.Identity.DeviceId,
 			Modules: []*pb.ModuleCapabilities{
 				&pb.ModuleCapabilities{
 					Id:   0,
@@ -81,7 +67,7 @@ func handleQueryCapabilities(ctx context.Context, query *pb.WireMessageQuery, rw
 	return
 }
 
-func handleQueryStatus(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type:   pb.ReplyType_REPLY_STATUS,
 		Status: &pb.DeviceStatus{},
@@ -92,7 +78,7 @@ func handleQueryStatus(ctx context.Context, query *pb.WireMessageQuery, rw reply
 	return
 }
 
-func handleQueryFiles(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+func handleQueryFiles(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type: pb.ReplyType_REPLY_FILES,
 		Files: &pb.Files{
@@ -110,7 +96,7 @@ func handleQueryFiles(ctx context.Context, query *pb.WireMessageQuery, rw replyW
 	return
 }
 
-func handleDownloadFile(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+func handleDownloadFile(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	size := 0
 	required := 1 * 1024 * 1024
 	body := proto.NewBuffer(make([]byte, 0))
@@ -149,10 +135,10 @@ func handleDownloadFile(ctx context.Context, query *pb.WireMessageQuery, rw repl
 	return
 }
 
-func handleQueryIdentity(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+func handleQueryIdentity(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	reply := &pb.WireMessageReply{
 		Type:     pb.ReplyType_REPLY_IDENTITY,
-		Identity: &state.Identity,
+		Identity: &device.State.Identity,
 	}
 
 	_, err = rw.WriteReply(reply)
@@ -160,13 +146,13 @@ func handleQueryIdentity(ctx context.Context, query *pb.WireMessageQuery, rw rep
 	return
 }
 
-func handleConfigureIdentity(ctx context.Context, query *pb.WireMessageQuery, rw replyWriter) (err error) {
-	state.Identity.Device = query.Identity.Device
-	state.Identity.Stream = query.Identity.Stream
+func handleConfigureIdentity(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
+	device.State.Identity.Device = query.Identity.Device
+	device.State.Identity.Stream = query.Identity.Stream
 
 	reply := &pb.WireMessageReply{
 		Type:     pb.ReplyType_REPLY_IDENTITY,
-		Identity: &state.Identity,
+		Identity: &device.State.Identity,
 	}
 
 	_, err = rw.WriteReply(reply)
