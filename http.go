@@ -24,8 +24,14 @@ func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, err
 		device:     device,
 	}
 
+	notFoundHandler := http.NotFoundHandler()
+
 	server := http.NewServeMux()
 	server.Handle("/fk/v1", hs)
+	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		log.Printf("Unknown URL: %s", req.URL)
+		notFoundHandler.ServeHTTP(w, req)
+	})
 
 	sslPort := device.Port + 1000
 
