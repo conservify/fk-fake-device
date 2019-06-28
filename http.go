@@ -47,7 +47,7 @@ func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, err
 func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 
-	log.Printf("(http) Request: %v", req)
+	log.Printf("(http) Request: %v %v", req.RemoteAddr, req)
 
 	contentType := req.Header.Get("Content-Type")
 
