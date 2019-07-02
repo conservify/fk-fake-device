@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/golang/protobuf/proto"
 
@@ -28,6 +29,34 @@ func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, err
 
 	server := http.NewServeMux()
 	server.Handle("/fk/v1", hs)
+	server.HandleFunc("/fk/v1/download", func(w http.ResponseWriter, req *http.Request) {
+		junk := make([]byte, 1024)
+		size := 1024 * 1024
+		bytes := 0
+		desired := req.URL.Query()["size"]
+
+		if len(desired) == 1 {
+			i, err := strconv.Atoi(desired[0])
+			if err != nil {
+				panic(err)
+			}
+			size = i * len(junk)
+		}
+
+		log.Printf("(http) serving junk data (%v bytes)", size)
+
+		rw := &httpReplyWriter{
+			hexEncoding: false,
+			res:         w,
+		}
+
+		rw.Prepare(size)
+		rw.WriteHeaders()
+		for bytes < size {
+			rw.WriteBytes(junk)
+			bytes += len(junk)
+		}
+	})
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
 		notFoundHandler.ServeHTTP(w, req)
@@ -105,7 +134,7 @@ type httpReplyWriter struct {
 	res         http.ResponseWriter
 }
 
-func (rw *httpReplyWriter) writeHeaders() error {
+func (rw *httpReplyWriter) WriteHeaders() error {
 	if !rw.headers {
 		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
 		rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
@@ -137,7 +166,7 @@ func (rw *httpReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
 		rw.size += len(bytes)
 	}
 
-	rw.writeHeaders()
+	rw.WriteHeaders()
 
 	return rw.WriteBytes(bytes)
 }
