@@ -72,7 +72,6 @@ func (ss *StreamState) Append(body []byte) {
 
 	ss.Record += 1
 	ss.Time = uint64(time.Now().Unix())
-	ss.Size += uint64(len(record.Bytes()))
 	ss.Size += uint64(len(body))
 }
 
@@ -90,6 +89,46 @@ func (ss *StreamState) AppendReading() {
 	ss.Append(body.Bytes())
 }
 
+func (ss *StreamState) OpenFile() (*os.File, error) {
+	return os.OpenFile(ss.File, os.O_CREATE, 0644)
+}
+
+func (ss *StreamState) PositionOf(record uint64) int64 {
+	file, err := os.OpenFile(ss.File, os.O_CREATE, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	position := int64(0)
+
+	for true {
+		header := RecordHeader{}
+		err := binary.Read(file, binary.BigEndian, &header)
+		if err == io.EOF {
+			break
+		}
+
+		if header.Record == record {
+			log.Printf("Position(%d) = %d", record, position)
+
+			return position
+		}
+
+		_, err = file.Seek(int64(header.Size), 1)
+		if err != nil {
+			panic(err)
+		}
+
+		position += int64(header.Size)
+	}
+
+	log.Printf("Position(%d) = %d (EOF)", record, position)
+
+	return position
+}
+
 func (ss *StreamState) Open() {
 	file, err := os.OpenFile(ss.File, os.O_CREATE, 0644)
 	if err != nil {
@@ -105,16 +144,16 @@ func (ss *StreamState) Open() {
 			break
 		}
 
-		pos, err := file.Seek(int64(header.Size), 1)
+		_, err = file.Seek(int64(header.Size), 1)
 		if err != nil {
 			panic(err)
 		}
 
 		ss.Record = header.Record + 1
-		ss.Size = uint64(pos)
+		ss.Size += uint64(header.Size)
 	}
 
-	log.Printf("Opened %s (#%d)", ss.File, ss.Record)
+	log.Printf("Opened %s (#%d) (%d bytes)", ss.File, ss.Record, ss.Size)
 }
 
 type HardwareState struct {
@@ -155,7 +194,7 @@ func (fd *FakeDevice) FakeReadings() {
 	for {
 		fd.State.Streams[0].AppendReading()
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 

@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/golang/protobuf/proto"
 
@@ -18,12 +20,7 @@ type HttpServer struct {
 	device     *FakeDevice
 }
 
-func HandleDownload(w http.ResponseWriter, req *http.Request) error {
-	ctx := context.Background()
-
-	start := 0
-	finish := 100
-
+func GetDownloadQuery(ctx context.Context, req *http.Request) *pb.DownloadQuery {
 	/* Hack to support hex encoded encoding. */
 	var reader io.Reader = req.Body
 	contentType := req.Header.Get("Content-Type")
@@ -31,7 +28,7 @@ func HandleDownload(w http.ResponseWriter, req *http.Request) error {
 	if hexEncoding {
 		reader = hex.NewDecoder(req.Body)
 	}
-	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
+	queries, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
 		buf := proto.NewBuffer(bytes)
 		downloadQuery := &pb.DownloadQuery{}
 		err = buf.Unmarshal(downloadQuery)
@@ -41,32 +38,92 @@ func HandleDownload(w http.ResponseWriter, req *http.Request) error {
 
 		log.Printf("(http) Query: %v", downloadQuery)
 
-		return nil, io.EOF
+		return downloadQuery, io.EOF
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	w.Header().Add("Fk-Sync", fmt.Sprintf("%d, %d", start, finish))
-
-	body := proto.NewBuffer(make([]byte, 0))
-
-	for reading := start; reading < finish; reading += 1 {
-		record := generateFakeReading(uint32(reading))
-		body.EncodeMessage(record)
+	if len(queries) == 0 {
+		start_str := req.URL.Query()["start"]
+		end_str := req.URL.Query()["end"]
+		if len(start_str) == 1 && len(end_str) == 1 {
+			start, err := strconv.Atoi(start_str[0])
+			if err != nil {
+				panic(err)
+			}
+			end, err := strconv.Atoi(end_str[0])
+			if err != nil {
+				panic(err)
+			}
+			return &pb.DownloadQuery{
+				Ranges: []*pb.Range{
+					&pb.Range{
+						Start: uint32(start),
+						End:   uint32(end),
+					},
+				},
+			}
+		}
+		return nil
 	}
 
-	size := len(body.Bytes())
+	return queries[0].(*pb.DownloadQuery)
+}
 
-	log.Printf("(http) Downloading (%d -> %d) %d bytes", start, finish, size)
+func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Request, stream *StreamState) error {
+	start := uint64(0)
+	end := stream.Record + 1
+
+	query := GetDownloadQuery(ctx, req)
+	if query != nil {
+		log.Printf("%v", query)
+		start = uint64(query.Ranges[0].Start)
+		end = uint64(query.Ranges[0].End)
+	}
+
+	start_position := stream.PositionOf(start)
+	end_position := stream.PositionOf(end)
+	length := end_position - start_position
+
+	log.Printf("(http) Downloading (%d -> %d)", start, end)
+	log.Printf("(http) Downloading (%d -> %d) %d bytes", start_position, end_position, length)
+
+	w.Header().Add("Fk-Sync", fmt.Sprintf("%d, %d", start, end))
+
+	file, err := stream.OpenFile()
+	if err != nil {
+		panic(err)
+	}
 
 	rw := &HttpReplyWriter{
 		hexEncoding: false,
 		res:         w,
 	}
+	rw.Prepare(int(length))
 
-	rw.Prepare(size)
-	rw.WriteBytes(body.Bytes())
+	buffer := make([]byte, 1024)
+	for true {
+		header := RecordHeader{}
+		err := binary.Read(file, binary.BigEndian, &header)
+		if err == io.EOF {
+			break
+		}
+
+		if header.Record >= start && header.Record < end {
+			limited := io.LimitReader(file, int64(header.Size))
+			nread, err := io.ReadAtLeast(limited, buffer, int(header.Size))
+			if err != nil {
+				panic(err)
+			}
+
+			rw.WriteBytes(buffer[:nread])
+		} else {
+			file.Seek(int64(header.Size), 1)
+		}
+	}
+
+	defer file.Close()
 
 	return nil
 }
@@ -82,7 +139,12 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 	server := http.NewServeMux()
 	server.Handle("/fk/v1", hs)
 	server.HandleFunc("/fk/v1/download/0", func(w http.ResponseWriter, req *http.Request) {
-		HandleDownload(w, req)
+		ctx := context.Background()
+		HandleDownload(ctx, w, req, device.State.Streams[0])
+	})
+	server.HandleFunc("/fk/v1/download/1", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleDownload(ctx, w, req, device.State.Streams[1])
 	})
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
