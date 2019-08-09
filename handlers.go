@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 
 	"github.com/golang/protobuf/proto"
 
@@ -98,7 +99,7 @@ func handleQueryFiles(ctx context.Context, device *FakeDevice, query *pb.WireMes
 
 func handleDownloadFile(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, rw replyWriter) (err error) {
 	size := 0
-	required := 1 * 1024 * 1024
+	required := 10 * 1024 * 1024
 	body := proto.NewBuffer(make([]byte, 0))
 
 	if query.DownloadFile != nil {
@@ -106,6 +107,8 @@ func handleDownloadFile(ctx context.Context, device *FakeDevice, query *pb.WireM
 			required = int(query.DownloadFile.Length)
 		}
 	}
+
+	log.Printf("Sending %d bytes", required)
 
 	for size < required {
 		reply := &pb.WireMessageReply{

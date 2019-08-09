@@ -7,7 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
+	_ "strconv"
 
 	"github.com/golang/protobuf/proto"
 
@@ -17,6 +17,33 @@ import (
 type httpServer struct {
 	dispatcher *dispatcher
 	device     *FakeDevice
+}
+
+func handleDownload(w http.ResponseWriter, req *http.Request) error {
+	start := 0
+	finish := 100
+	w.Header().Add("Fk-Sync", fmt.Sprintf("%d, %d", start, finish))
+
+	body := proto.NewBuffer(make([]byte, 0))
+
+	for reading := start; reading < finish; reading += 1 {
+		record := generateFakeReading(uint32(reading))
+		body.EncodeMessage(record)
+	}
+
+	size := len(body.Bytes())
+
+	log.Printf("(http) Downloading (%d -> %d) %d bytes", start, finish, size)
+
+	rw := &httpReplyWriter{
+		hexEncoding: false,
+		res:         w,
+	}
+
+	rw.Prepare(size)
+	rw.WriteBytes(body.Bytes())
+
+	return nil
 }
 
 func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, error) {
@@ -29,33 +56,8 @@ func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, err
 
 	server := http.NewServeMux()
 	server.Handle("/fk/v1", hs)
-	server.HandleFunc("/fk/v1/download", func(w http.ResponseWriter, req *http.Request) {
-		junk := make([]byte, 1024)
-		size := 1024 * 1024
-		bytes := 0
-		desired := req.URL.Query()["size"]
-
-		if len(desired) == 1 {
-			i, err := strconv.Atoi(desired[0])
-			if err != nil {
-				panic(err)
-			}
-			size = i * len(junk)
-		}
-
-		log.Printf("(http) serving junk data (%v bytes)", size)
-
-		rw := &httpReplyWriter{
-			hexEncoding: false,
-			res:         w,
-		}
-
-		rw.Prepare(size)
-		rw.WriteHeaders()
-		for bytes < size {
-			rw.WriteBytes(junk)
-			bytes += len(junk)
-		}
+	server.HandleFunc("/fk/v1/download/0", func(w http.ResponseWriter, req *http.Request) {
+		handleDownload(w, req)
 	})
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
@@ -172,6 +174,8 @@ func (rw *httpReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
 }
 
 func (rw *httpReplyWriter) WriteBytes(bytes []byte) (int, error) {
+	rw.WriteHeaders()
+
 	if rw.hexEncoding {
 		writer := hex.NewEncoder(rw.res)
 		return writer.Write(bytes)

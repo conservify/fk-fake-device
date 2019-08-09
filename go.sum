@@ -2,6 +2,8 @@ github.com/cenkalti/backoff v2.1.1+incompatible h1:tKJnvO2kl0zmb/jA5UKAt4VoEVw1q
 github.com/cenkalti/backoff v2.1.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/fieldkit/app-protocol v0.0.0-20190423013407-4abafda401d8 h1:w8eNRhPNh2h7vFURedHD3gGOucFvs0FPKq7YPPHVRhE=
 github.com/fieldkit/app-protocol v0.0.0-20190423013407-4abafda401d8/go.mod h1:jjIhpGgqXVZNxQS1wo1dfxesz3oi/lQcxqmPQsdJCVA=
+github.com/fieldkit/data-protocol v0.0.0-20190801160434-f42e269cfc17 h1:5CA/2IgMY28dNq5tPlL5Xl8hVksrV3IOpAEdtyIObhQ=
+github.com/fieldkit/data-protocol v0.0.0-20190801160434-f42e269cfc17/go.mod h1:Atpguegf5+RPc1NjBgZ3oukS3WAqckGBcLjdRJOvY6A=
 github.com/golang/protobuf v1.3.1 h1:YF8+flBXS5eO826T4nzqPrxfhQThhXl0YzfuUPu4SBg=
 github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c h1:svzQzfVE9t7Y1CGULS5PsMWs4/H4Au/ZTJzU/0CKgqc=
