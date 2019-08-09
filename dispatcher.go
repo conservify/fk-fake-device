@@ -6,25 +6,25 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-type replyWriter interface {
+type ReplyWriter interface {
 	Prepare(size int) error
-	WriteReply(reply *pb.WireMessageReply) (int, error)
+	WriteReply(reply *pb.HttpReply) (int, error)
 	WriteBytes(bytes []byte) (int, error)
 }
 
-type apiHandler func(ctx context.Context, device *FakeDevice, query *pb.WireMessageQuery, reply replyWriter) (err error)
+type ApiHandler func(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, reply ReplyWriter) (err error)
 
-type dispatcher struct {
-	handlers map[pb.QueryType]apiHandler
+type Dispatcher struct {
+	handlers map[pb.QueryType]ApiHandler
 }
 
-func newDispatcher() *dispatcher {
-	handlers := make(map[pb.QueryType]apiHandler)
-	return &dispatcher{
+func NewDispatcher() *Dispatcher {
+	handlers := make(map[pb.QueryType]ApiHandler)
+	return &Dispatcher{
 		handlers: handlers,
 	}
 }
 
-func (rd *dispatcher) AddHandler(qt pb.QueryType, handler apiHandler) {
+func (rd *Dispatcher) AddHandler(qt pb.QueryType, handler ApiHandler) {
 	rd.handlers[qt] = handler
 }

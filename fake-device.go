@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/sha1"
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -11,12 +10,10 @@ import (
 
 	"github.com/grandcat/zeroconf"
 
-	"github.com/golang/protobuf/proto"
-
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func publishAddressOverZeroConf(name string, port int) *zeroconf.Server {
+func PublishAddressOverZeroConf(name string, port int) *zeroconf.Server {
 	serviceType := "_fk._tcp"
 
 	server, err := zeroconf.Register(name, serviceType, "local.", port, []string{"txtv=0", "lo=1", "la=2"}, nil)
@@ -29,68 +26,34 @@ func publishAddressOverZeroConf(name string, port int) *zeroconf.Server {
 	return server
 }
 
-func writeFile(fn string, msg proto.Message) error {
-	data, err := proto.Marshal(msg)
-	if err != nil {
-		return err
-	}
-
-	buf := proto.NewBuffer(make([]byte, 0))
-	buf.EncodeRawBytes(data)
-
-	err = ioutil.WriteFile(fn, buf.Bytes(), 0644)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Wrote %s...", fn)
-
-	return nil
-}
-
-func writeQueries() {
-	writeFile("query-caps.bin", &pb.WireMessageQuery{
-		Type: pb.QueryType_QUERY_CAPABILITIES,
-	})
-	writeFile("query-status.bin", &pb.WireMessageQuery{
-		Type: pb.QueryType_QUERY_STATUS,
-	})
-	writeFile("query-files.bin", &pb.WireMessageQuery{
-		Type: pb.QueryType_QUERY_FILES,
-	})
-	writeFile("query-download-file.bin", &pb.WireMessageQuery{
-		Type: pb.QueryType_QUERY_DOWNLOAD_FILE,
-	})
-	writeFile("query-rename.bin", &pb.WireMessageQuery{
-		Type: pb.QueryType_QUERY_CONFIGURE_IDENTITY,
-		Identity: &pb.Identity{
-			Device: "My Fancy Station",
-			Stream: "",
-		},
-	})
-}
-
 type Options struct {
-	WriteQueries bool
-	Names        string
+	Names string
+}
+
+type StreamState struct {
+	Time    uint64
+	Size    uint64
+	Version uint32
+	Record  uint64
 }
 
 type HardwareState struct {
 	Identity pb.Identity
+	Streams  [2]StreamState
 }
 
 type FakeDevice struct {
 	Name      string
 	Port      int
 	ZeroConf  *zeroconf.Server
-	WebServer *httpServer
+	WebServer *HttpServer
 	State     *HardwareState
 }
 
-func (fd *FakeDevice) Start(dispatcher *dispatcher) {
-	fd.ZeroConf = publishAddressOverZeroConf(fd.Name, fd.Port)
+func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
+	fd.ZeroConf = PublishAddressOverZeroConf(fd.Name, fd.Port)
 
-	ws, err := newHttpServer(fd, dispatcher)
+	ws, err := NewHttpServer(fd, dispatcher)
 	if err != nil {
 		panic(err)
 	}
@@ -115,6 +78,22 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 				DeviceId: deviceID,
 				Device:   name,
 				Stream:   "",
+				Firmware: "91150ca5b2b09608058da273e1181d02cabb2d53",
+				Build:    "fk-bundled-fkb.elf_JACOB-WORK_20190809_214014",
+			},
+			Streams: [2]StreamState{
+				StreamState{
+					Time:    0,
+					Size:    0,
+					Version: 0,
+					Record:  0,
+				},
+				StreamState{
+					Time:    0,
+					Size:    0,
+					Version: 0,
+					Record:  0,
+				},
 			},
 		}
 
@@ -130,37 +109,17 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 func main() {
 	o := Options{}
 
-	flag.BoolVar(&o.WriteQueries, "write-queries", false, "")
 	flag.StringVar(&o.Names, "names", "fake0", "")
-
 	flag.Parse()
-
-	if o.WriteQueries {
-		log.Printf("Writing sample query files...")
-
-		writeQueries()
-	}
 
 	names := strings.Split(o.Names, ",")
 	devices := CreateFakeDevicesNamed(names)
 
-	dispatcher := newDispatcher()
-	dispatcher.AddHandler(pb.QueryType_QUERY_CAPABILITIES, handleQueryCapabilities)
+	dispatcher := NewDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
-	dispatcher.AddHandler(pb.QueryType_QUERY_FILES, handleQueryFiles)
-	dispatcher.AddHandler(pb.QueryType_QUERY_DOWNLOAD_FILE, handleDownloadFile)
-	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE_IDENTITY, handleConfigureIdentity)
-	dispatcher.AddHandler(pb.QueryType_QUERY_IDENTITY, handleQueryIdentity)
-
-	ts, err := newTcpServer(dispatcher)
-	if err != nil {
-		panic(err)
-	}
-	defer ts.Close()
 
 	for _, device := range devices {
 		device.Start(dispatcher)
-
 		defer device.Close()
 	}
 

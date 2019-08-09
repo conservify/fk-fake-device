@@ -14,14 +14,40 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-type httpServer struct {
-	dispatcher *dispatcher
+type HttpServer struct {
+	dispatcher *Dispatcher
 	device     *FakeDevice
 }
 
-func handleDownload(w http.ResponseWriter, req *http.Request) error {
+func HandleDownload(w http.ResponseWriter, req *http.Request) error {
+	ctx := context.Background()
+
 	start := 0
 	finish := 100
+
+	/* Hack to support hex encoded encoding. */
+	var reader io.Reader = req.Body
+	contentType := req.Header.Get("Content-Type")
+	hexEncoding := contentType == "text/plain"
+	if hexEncoding {
+		reader = hex.NewDecoder(req.Body)
+	}
+	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
+		buf := proto.NewBuffer(bytes)
+		downloadQuery := &pb.DownloadQuery{}
+		err = buf.Unmarshal(downloadQuery)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Printf("(http) Query: %v", downloadQuery)
+
+		return nil, io.EOF
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	w.Header().Add("Fk-Sync", fmt.Sprintf("%d, %d", start, finish))
 
 	body := proto.NewBuffer(make([]byte, 0))
@@ -35,7 +61,7 @@ func handleDownload(w http.ResponseWriter, req *http.Request) error {
 
 	log.Printf("(http) Downloading (%d -> %d) %d bytes", start, finish, size)
 
-	rw := &httpReplyWriter{
+	rw := &HttpReplyWriter{
 		hexEncoding: false,
 		res:         w,
 	}
@@ -46,8 +72,8 @@ func handleDownload(w http.ResponseWriter, req *http.Request) error {
 	return nil
 }
 
-func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, error) {
-	hs := &httpServer{
+func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, error) {
+	hs := &HttpServer{
 		dispatcher: dispatcher,
 		device:     device,
 	}
@@ -57,7 +83,7 @@ func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, err
 	server := http.NewServeMux()
 	server.Handle("/fk/v1", hs)
 	server.HandleFunc("/fk/v1/download/0", func(w http.ResponseWriter, req *http.Request) {
-		handleDownload(w, req)
+		HandleDownload(w, req)
 	})
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
@@ -75,7 +101,7 @@ func newHttpServer(device *FakeDevice, dispatcher *dispatcher) (*httpServer, err
 	return hs, nil
 }
 
-func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+func (hs *HttpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 
 	log.Printf("(http) Request: %v %v", req.RemoteAddr, req)
@@ -91,13 +117,13 @@ func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 
 	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
-		rw := &httpReplyWriter{
+		rw := &HttpReplyWriter{
 			hexEncoding: hexEncoding,
 			res:         res,
 		}
 
 		buf := proto.NewBuffer(bytes)
-		wireQuery := &pb.WireMessageQuery{}
+		wireQuery := &pb.HttpQuery{}
 		err = buf.Unmarshal(wireQuery)
 		if err != nil {
 			return nil, err
@@ -126,17 +152,17 @@ func (hs *httpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (hs *httpServer) Close() {
+func (hs *HttpServer) Close() {
 }
 
-type httpReplyWriter struct {
+type HttpReplyWriter struct {
 	hexEncoding bool
 	headers     bool
 	size        int
 	res         http.ResponseWriter
 }
 
-func (rw *httpReplyWriter) WriteHeaders() error {
+func (rw *HttpReplyWriter) WriteHeaders() error {
 	if !rw.headers {
 		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
 		rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
@@ -146,13 +172,13 @@ func (rw *httpReplyWriter) WriteHeaders() error {
 	return nil
 }
 
-func (rw *httpReplyWriter) Prepare(size int) error {
+func (rw *HttpReplyWriter) Prepare(size int) error {
 	rw.size = size
 
 	return nil
 }
 
-func (rw *httpReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
+func (rw *HttpReplyWriter) WriteReply(m *pb.HttpReply) (int, error) {
 	data, err := proto.Marshal(m)
 	if err != nil {
 		return 0, err
@@ -173,7 +199,7 @@ func (rw *httpReplyWriter) WriteReply(m *pb.WireMessageReply) (int, error) {
 	return rw.WriteBytes(bytes)
 }
 
-func (rw *httpReplyWriter) WriteBytes(bytes []byte) (int, error) {
+func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
 	rw.WriteHeaders()
 
 	if rw.hexEncoding {
@@ -183,8 +209,8 @@ func (rw *httpReplyWriter) WriteBytes(bytes []byte) (int, error) {
 	return rw.res.Write(bytes)
 }
 
-func (rw *httpReplyWriter) WriteError(message string) (int, error) {
-	wireReply := &pb.WireMessageReply{
+func (rw *HttpReplyWriter) WriteError(message string) (int, error) {
+	wireReply := &pb.HttpReply{
 		Type: pb.ReplyType_REPLY_ERROR,
 		Errors: []*pb.Error{
 			&pb.Error{
