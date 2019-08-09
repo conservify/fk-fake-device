@@ -7,6 +7,10 @@ import (
 	pb "github.com/fieldkit/data-protocol"
 )
 
+func generateFakeConfiguration() *pb.DataRecord {
+	return &pb.DataRecord{}
+}
+
 func generateFakeReading(reading uint32) *pb.DataRecord {
 	now := time.Now()
 

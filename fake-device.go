@@ -1,14 +1,21 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
+	"encoding/binary"
 	"flag"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/signal"
 	"strings"
+	"time"
 
 	"github.com/grandcat/zeroconf"
+
+	"github.com/golang/protobuf/proto"
 
 	pb "github.com/fieldkit/app-protocol"
 )
@@ -35,11 +42,84 @@ type StreamState struct {
 	Size    uint64
 	Version uint32
 	Record  uint64
+	File    string
+}
+
+type RecordHeader struct {
+	Size   uint32
+	Record uint64
+}
+
+func (ss *StreamState) Append(body []byte) {
+	file, err := os.OpenFile(ss.File, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	header := RecordHeader{
+		Size:   uint32(len(body)),
+		Record: ss.Record,
+	}
+
+	var record bytes.Buffer
+
+	binary.Write(&record, binary.BigEndian, header)
+
+	file.Write(record.Bytes())
+	file.Write(body)
+
+	ss.Record += 1
+	ss.Time = uint64(time.Now().Unix())
+	ss.Size += uint64(len(record.Bytes()))
+	ss.Size += uint64(len(body))
+}
+
+func (ss *StreamState) AppendConfiguration() {
+	body := proto.NewBuffer(make([]byte, 0))
+	record := generateFakeConfiguration()
+	body.EncodeMessage(record)
+	ss.Append(body.Bytes())
+}
+
+func (ss *StreamState) AppendReading() {
+	body := proto.NewBuffer(make([]byte, 0))
+	record := generateFakeReading(uint32(ss.Record))
+	body.EncodeMessage(record)
+	ss.Append(body.Bytes())
+}
+
+func (ss *StreamState) Open() {
+	file, err := os.OpenFile(ss.File, os.O_CREATE, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	for true {
+		header := RecordHeader{}
+		err := binary.Read(file, binary.BigEndian, &header)
+		if err == io.EOF {
+			break
+		}
+
+		pos, err := file.Seek(int64(header.Size), 1)
+		if err != nil {
+			panic(err)
+		}
+
+		ss.Record = header.Record + 1
+		ss.Size = uint64(pos)
+	}
+
+	log.Printf("Opened %s (#%d)", ss.File, ss.Record)
 }
 
 type HardwareState struct {
 	Identity pb.Identity
-	Streams  [2]StreamState
+	Streams  [2]*StreamState
 }
 
 type FakeDevice struct {
@@ -66,6 +146,19 @@ func (fd *FakeDevice) Close() {
 	fd.WebServer.Close()
 }
 
+func (fd *FakeDevice) FakeReadings() {
+	fd.State.Streams[0].Open()
+	fd.State.Streams[1].Open()
+
+	fd.State.Streams[1].AppendConfiguration()
+
+	for {
+		fd.State.Streams[0].AppendReading()
+
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 	devices := make([]*FakeDevice, len(names))
 	for i, name := range names {
@@ -81,18 +174,20 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 				Firmware: "91150ca5b2b09608058da273e1181d02cabb2d53",
 				Build:    "fk-bundled-fkb.elf_JACOB-WORK_20190809_214014",
 			},
-			Streams: [2]StreamState{
-				StreamState{
+			Streams: [2]*StreamState{
+				&StreamState{
 					Time:    0,
 					Size:    0,
 					Version: 0,
 					Record:  0,
+					File:    fmt.Sprintf("%s-data.fkpb", name),
 				},
-				StreamState{
+				&StreamState{
 					Time:    0,
 					Size:    0,
 					Version: 0,
 					Record:  0,
+					File:    fmt.Sprintf("%s-meta.fkpb", name),
 				},
 			},
 		}
@@ -120,6 +215,7 @@ func main() {
 
 	for _, device := range devices {
 		device.Start(dispatcher)
+		go device.FakeReadings()
 		defer device.Close()
 	}
 
