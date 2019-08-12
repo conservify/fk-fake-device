@@ -122,6 +122,17 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	now := time.Now()
 
+	if !device.State.ReadingsReady {
+		device.State.ReadingsReady = true
+		reply := &pb.HttpReply{
+			Type: pb.ReplyType_REPLY_BUSY,
+		}
+		_, err = rw.WriteReply(reply)
+		return
+	}
+
+	device.State.ReadingsReady = false
+
 	ph := rand.Float32() * 7
 	conductivity := rand.Float32() * 100
 	dissolvedOxygen := rand.Float32() * 10

@@ -157,8 +157,9 @@ func (ss *StreamState) Open() {
 }
 
 type HardwareState struct {
-	Identity pb.Identity
-	Streams  [2]*StreamState
+	Identity      pb.Identity
+	Streams       [2]*StreamState
+	ReadingsReady bool
 }
 
 type FakeDevice struct {
