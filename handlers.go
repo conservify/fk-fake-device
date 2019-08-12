@@ -120,8 +120,72 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 }
 
 func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	now := time.Now()
+	if !device.State.ReadingsReady {
+		reply := &pb.HttpReply{
+			Type: pb.ReplyType_REPLY_BUSY,
+		}
+		_, err = rw.WriteReply(reply)
+		return
+	}
 
+	now := time.Now()
+	ph := rand.Float32() * 7
+	conductivity := rand.Float32() * 100
+	dissolvedOxygen := rand.Float32() * 10
+	temperature := rand.Float32() * 30
+	depth := rand.Float32() * 10000
+
+	reply := &pb.HttpReply{
+		Type: pb.ReplyType_REPLY_READINGS,
+		Readings: []*pb.Readings{
+			&pb.Readings{
+				Time: uint64(now.Unix()),
+				Modules: []*pb.ModuleReadings{
+					&pb.ModuleReadings{
+						Module: 0,
+						Readings: []*pb.SensorAndValue{
+							&pb.SensorAndValue{
+								Sensor: 0,
+								Value:  ph,
+							},
+						},
+					},
+					&pb.ModuleReadings{
+						Module: 1,
+						Readings: []*pb.SensorAndValue{
+							&pb.SensorAndValue{
+								Sensor: 0,
+								Value:  dissolvedOxygen,
+							},
+						},
+					},
+					&pb.ModuleReadings{
+						Module: 2,
+						Readings: []*pb.SensorAndValue{
+							&pb.SensorAndValue{
+								Sensor: 0,
+								Value:  conductivity,
+							},
+							&pb.SensorAndValue{
+								Sensor: 1,
+								Value:  temperature,
+							},
+							&pb.SensorAndValue{
+								Sensor: 2,
+								Value:  depth,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err = rw.WriteReply(reply)
+	return
+}
+
+func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if !device.State.ReadingsReady {
 		device.State.ReadingsReady = true
 		reply := &pb.HttpReply{
@@ -133,6 +197,7 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 
 	device.State.ReadingsReady = false
 
+	now := time.Now()
 	ph := rand.Float32() * 7
 	conductivity := rand.Float32() * 100
 	dissolvedOxygen := rand.Float32() * 10
