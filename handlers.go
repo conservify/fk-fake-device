@@ -73,7 +73,6 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 						Name:          "pH",
 						UnitOfMeasure: "",
 						Frequency:     60,
-						Module:        0,
 					},
 				},
 			},
@@ -83,10 +82,9 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Id:            0,
-						Name:          "Conductivity",
-						UnitOfMeasure: "µS/cm",
+						Name:          "Dissolved Oxygen",
+						UnitOfMeasure: "",
 						Frequency:     60,
-						Module:        0,
 					},
 				},
 			},
@@ -99,28 +97,77 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 						Name:          "Conductivity",
 						UnitOfMeasure: "µS/cm",
 						Frequency:     60,
-						Module:        0,
 					},
 					&pb.SensorCapabilities{
 						Id:            1,
 						Name:          "Temperature",
 						UnitOfMeasure: "C",
 						Frequency:     60,
-						Module:        1,
 					},
 					&pb.SensorCapabilities{
 						Id:            2,
 						Name:          "Depth",
 						UnitOfMeasure: "m",
 						Frequency:     60,
-						Module:        2,
 					},
-					&pb.SensorCapabilities{
-						Id:            3,
-						Name:          "Hydrophone",
-						UnitOfMeasure: "",
-						Frequency:     0,
-						Module:        2,
+				},
+			},
+		},
+	}
+
+	_, err = rw.WriteReply(reply)
+	return
+}
+
+func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	now := time.Now()
+
+	ph := rand.Float32() * 7
+	conductivity := rand.Float32() * 100
+	dissolvedOxygen := rand.Float32() * 10
+	temperature := rand.Float32() * 30
+	depth := rand.Float32() * 10000
+
+	reply := &pb.HttpReply{
+		Type: pb.ReplyType_REPLY_READINGS,
+		Readings: []*pb.Readings{
+			&pb.Readings{
+				Time: uint64(now.Unix()),
+				Modules: []*pb.ModuleReadings{
+					&pb.ModuleReadings{
+						Module: 0,
+						Readings: []*pb.SensorAndValue{
+							&pb.SensorAndValue{
+								Sensor: 0,
+								Value:  ph,
+							},
+						},
+					},
+					&pb.ModuleReadings{
+						Module: 1,
+						Readings: []*pb.SensorAndValue{
+							&pb.SensorAndValue{
+								Sensor: 0,
+								Value:  dissolvedOxygen,
+							},
+						},
+					},
+					&pb.ModuleReadings{
+						Module: 2,
+						Readings: []*pb.SensorAndValue{
+							&pb.SensorAndValue{
+								Sensor: 0,
+								Value:  conductivity,
+							},
+							&pb.SensorAndValue{
+								Sensor: 1,
+								Value:  temperature,
+							},
+							&pb.SensorAndValue{
+								Sensor: 2,
+								Value:  depth,
+							},
+						},
 					},
 				},
 			},

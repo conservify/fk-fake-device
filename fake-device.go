@@ -251,6 +251,7 @@ func main() {
 
 	dispatcher := NewDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
+	dispatcher.AddHandler(pb.QueryType_QUERY_READINGS, handleQueryReadings)
 
 	for _, device := range devices {
 		device.Start(dispatcher)
