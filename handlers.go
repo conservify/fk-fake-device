@@ -11,6 +11,9 @@ import (
 func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	now := time.Now()
 
+	used := uint32(device.State.Streams[0].Size + device.State.Streams[1].Size)
+	available := uint32(512 * 1024 * 1024)
+
 	reply := &pb.HttpReply{
 		Type: pb.ReplyType_REPLY_STATUS,
 		Status: &pb.Status{
@@ -19,10 +22,11 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 			Identity: &device.State.Identity,
 			Memory: &pb.MemoryStatus{
 				SramAvailable:           128 * 1024,
-				ProgramAvailable:        600 * 1024,
+				ProgramFlashAvailable:   600 * 1024,
 				ExtendedMemoryAvailable: 0,
-				DataMemoryAvailable:     0,
-				DataMemoryUsed:          0,
+				DataMemoryAvailable:     available,
+				DataMemoryUsed:          used,
+				DataMemoryConsumption:   float32(used) / float32(available) * 100.0,
 			},
 			Gps: &pb.GpsStatus{
 				Fix:        1,

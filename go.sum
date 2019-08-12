@@ -12,6 +12,8 @@ github.com/fieldkit/app-protocol v0.0.0-20190423013407-4abafda401d8 h1:w8eNRhPNh
 github.com/fieldkit/app-protocol v0.0.0-20190423013407-4abafda401d8/go.mod h1:jjIhpGgqXVZNxQS1wo1dfxesz3oi/lQcxqmPQsdJCVA=
 github.com/fieldkit/app-protocol v0.0.0-20190730181656-e3c4761c11d0 h1:0GWiBY2fBrTj4t5uMPQ9wSlFxbPKwXzs9fuVrXB9yVc=
 github.com/fieldkit/app-protocol v0.0.0-20190730181656-e3c4761c11d0/go.mod h1:66+REnvMubqJ3o4jFTi7J94Qi3qIvyYdFLRJyteaF/s=
+github.com/fieldkit/app-protocol v0.0.0-20190812192248-ff7241415b76 h1:EUuqqgFRIei2cx2NRuB8/+jvdP8bvke9Q0CqYmKn4hc=
+github.com/fieldkit/app-protocol v0.0.0-20190812192248-ff7241415b76/go.mod h1:66+REnvMubqJ3o4jFTi7J94Qi3qIvyYdFLRJyteaF/s=
 github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
 github.com/fieldkit/cloud v0.0.0-20190529183849-5426fab875ec/go.mod h1:3t/uXpAzdatC0wZ+NbO7cu5VhheO3l43o9egSygavw8=
 github.com/fieldkit/data-protocol v0.0.0-20190801160434-f42e269cfc17 h1:5CA/2IgMY28dNq5tPlL5Xl8hVksrV3IOpAEdtyIObhQ=
