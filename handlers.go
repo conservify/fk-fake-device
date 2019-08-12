@@ -12,7 +12,7 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 	now := time.Now()
 
 	used := uint32(device.State.Streams[0].Size + device.State.Streams[1].Size)
-	available := uint32(512 * 1024 * 1024)
+	installed := uint32(512 * 1024 * 1024)
 
 	reply := &pb.HttpReply{
 		Type: pb.ReplyType_REPLY_STATUS,
@@ -24,9 +24,9 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 				SramAvailable:           128 * 1024,
 				ProgramFlashAvailable:   600 * 1024,
 				ExtendedMemoryAvailable: 0,
-				DataMemoryAvailable:     available,
+				DataMemoryInstalled:     installed,
 				DataMemoryUsed:          used,
-				DataMemoryConsumption:   float32(used) / float32(available) * 100.0,
+				DataMemoryConsumption:   float32(used) / float32(installed) * 100.0,
 			},
 			Gps: &pb.GpsStatus{
 				Fix:        1,
