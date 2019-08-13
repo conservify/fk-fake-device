@@ -8,13 +8,12 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 	now := time.Now()
-
 	used := uint32(device.State.Streams[0].Size + device.State.Streams[1].Size)
 	installed := uint32(512 * 1024 * 1024)
 
-	reply := &pb.HttpReply{
+	return &pb.HttpReply{
 		Type: pb.ReplyType_REPLY_STATUS,
 		Status: &pb.Status{
 			Version:  1,
@@ -114,19 +113,16 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 			},
 		},
 	}
+}
 
+func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)
 	return
 }
 
-func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	if !device.State.ReadingsReady {
-		reply := &pb.HttpReply{
-			Type: pb.ReplyType_REPLY_BUSY,
-		}
-		_, err = rw.WriteReply(reply)
-		return
-	}
+func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
+	status := makeStatusReply(device)
 
 	now := time.Now()
 	ph := rand.Float32() * 7
@@ -135,43 +131,43 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 	temperature := rand.Float32() * 30
 	depth := rand.Float32() * 10000
 
-	reply := &pb.HttpReply{
+	return &pb.HttpReply{
 		Type: pb.ReplyType_REPLY_READINGS,
-		Readings: []*pb.Readings{
-			&pb.Readings{
+		LiveReadings: []*pb.LiveReadings{
+			&pb.LiveReadings{
 				Time: uint64(now.Unix()),
-				Modules: []*pb.ModuleReadings{
-					&pb.ModuleReadings{
-						Module: 0,
-						Readings: []*pb.SensorAndValue{
-							&pb.SensorAndValue{
-								Sensor: 0,
+				Modules: []*pb.LiveModuleReadings{
+					&pb.LiveModuleReadings{
+						Module: status.Modules[0],
+						Readings: []*pb.LiveSensorReading{
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[0].Sensors[0],
 								Value:  ph,
 							},
 						},
 					},
-					&pb.ModuleReadings{
-						Module: 1,
-						Readings: []*pb.SensorAndValue{
-							&pb.SensorAndValue{
-								Sensor: 0,
+					&pb.LiveModuleReadings{
+						Module: status.Modules[1],
+						Readings: []*pb.LiveSensorReading{
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[1].Sensors[0],
 								Value:  dissolvedOxygen,
 							},
 						},
 					},
-					&pb.ModuleReadings{
-						Module: 2,
-						Readings: []*pb.SensorAndValue{
-							&pb.SensorAndValue{
-								Sensor: 0,
+					&pb.LiveModuleReadings{
+						Module: status.Modules[2],
+						Readings: []*pb.LiveSensorReading{
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[2].Sensors[0],
 								Value:  conductivity,
 							},
-							&pb.SensorAndValue{
-								Sensor: 1,
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[2].Sensors[1],
 								Value:  temperature,
 							},
-							&pb.SensorAndValue{
-								Sensor: 2,
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[2].Sensors[2],
 								Value:  depth,
 							},
 						},
@@ -180,6 +176,26 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 			},
 		},
 	}
+}
+
+func makeBusyReply(delay uint32) *pb.HttpReply {
+	return &pb.HttpReply{
+		Type: pb.ReplyType_REPLY_BUSY,
+		Errors: []*pb.Error{
+			&pb.Error{
+				Delay: delay,
+			},
+		},
+	}
+}
+
+func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	if !device.State.ReadingsReady {
+		_, err = rw.WriteReply(makeBusyReply(0))
+		return
+	}
+
+	reply := makeLiveReadingsReply(device)
 
 	_, err = rw.WriteReply(reply)
 	return
@@ -188,67 +204,13 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if !device.State.ReadingsReady {
 		device.State.ReadingsReady = true
-		reply := &pb.HttpReply{
-			Type: pb.ReplyType_REPLY_BUSY,
-		}
-		_, err = rw.WriteReply(reply)
+		_, err = rw.WriteReply(makeBusyReply(0))
 		return
 	}
 
 	device.State.ReadingsReady = false
 
-	now := time.Now()
-	ph := rand.Float32() * 7
-	conductivity := rand.Float32() * 100
-	dissolvedOxygen := rand.Float32() * 10
-	temperature := rand.Float32() * 30
-	depth := rand.Float32() * 10000
-
-	reply := &pb.HttpReply{
-		Type: pb.ReplyType_REPLY_READINGS,
-		Readings: []*pb.Readings{
-			&pb.Readings{
-				Time: uint64(now.Unix()),
-				Modules: []*pb.ModuleReadings{
-					&pb.ModuleReadings{
-						Module: 0,
-						Readings: []*pb.SensorAndValue{
-							&pb.SensorAndValue{
-								Sensor: 0,
-								Value:  ph,
-							},
-						},
-					},
-					&pb.ModuleReadings{
-						Module: 1,
-						Readings: []*pb.SensorAndValue{
-							&pb.SensorAndValue{
-								Sensor: 0,
-								Value:  dissolvedOxygen,
-							},
-						},
-					},
-					&pb.ModuleReadings{
-						Module: 2,
-						Readings: []*pb.SensorAndValue{
-							&pb.SensorAndValue{
-								Sensor: 0,
-								Value:  conductivity,
-							},
-							&pb.SensorAndValue{
-								Sensor: 1,
-								Value:  temperature,
-							},
-							&pb.SensorAndValue{
-								Sensor: 2,
-								Value:  depth,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+	reply := makeLiveReadingsReply(device)
 
 	_, err = rw.WriteReply(reply)
 	return

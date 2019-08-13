@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
-	github.com/fieldkit/app-protocol v0.0.0-20190812202931-264cdeb39268
+	github.com/fieldkit/app-protocol v0.0.0-20190813161138-98896a6b9c67
 	github.com/fieldkit/data-protocol v0.0.0-20190801160434-f42e269cfc17
 	github.com/golang/protobuf v1.3.1
 	github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c
