@@ -37,3 +37,5 @@ clean:
 
 run: build
 	$(BUILDARCH)/fake-device
+
+.PHONY: build

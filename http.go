@@ -165,7 +165,7 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 func (hs *HttpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 
-	log.Printf("(http) Request: %v %v", req.RemoteAddr, req)
+	log.Printf("(http) Request: %v", req.RemoteAddr)
 
 	contentType := req.Header.Get("Content-Type")
 
@@ -256,6 +256,8 @@ func (rw *HttpReplyWriter) WriteReply(m *pb.HttpReply) (int, error) {
 	}
 
 	rw.WriteHeaders()
+
+	log.Printf("(http) Writing %d bytes", len(bytes))
 
 	return rw.WriteBytes(bytes)
 }
