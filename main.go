@@ -76,15 +76,15 @@ func (ss *StreamState) Append(body []byte) {
 }
 
 func (ss *StreamState) AppendConfiguration() {
-	body := proto.NewBuffer(make([]byte, 0))
 	record := generateFakeConfiguration()
+	body := proto.NewBuffer(make([]byte, 0))
 	body.EncodeMessage(record)
 	ss.Append(body.Bytes())
 }
 
 func (ss *StreamState) AppendReading() {
-	body := proto.NewBuffer(make([]byte, 0))
 	record := generateFakeReading(uint32(ss.Record))
+	body := proto.NewBuffer(make([]byte, 0))
 	body.EncodeMessage(record)
 	ss.Append(body.Bytes())
 }
