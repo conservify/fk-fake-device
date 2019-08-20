@@ -50,7 +50,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				Version: device.State.Streams[0].Version,
 				Block:   device.State.Streams[0].Record,
 				Name:    "data.fkpb",
-				Path:    "/fk/v1/download/0",
+				Path:    "/fk/v1/download/data",
 			},
 			&pb.DataStream{
 				Id:      1,
@@ -59,7 +59,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				Version: device.State.Streams[1].Version,
 				Block:   device.State.Streams[1].Record,
 				Name:    "meta.fkpb",
-				Path:    "/fk/v1/download/1",
+				Path:    "/fk/v1/download/meta",
 			},
 		},
 		Modules: []*pb.ModuleCapabilities{

@@ -142,7 +142,15 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 		ctx := context.Background()
 		HandleDownload(ctx, w, req, device.State.Streams[0])
 	})
+	server.HandleFunc("/fk/v1/download/data", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleDownload(ctx, w, req, device.State.Streams[0])
+	})
 	server.HandleFunc("/fk/v1/download/1", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleDownload(ctx, w, req, device.State.Streams[1])
+	})
+	server.HandleFunc("/fk/v1/download/meta", func(w http.ResponseWriter, req *http.Request) {
 		ctx := context.Background()
 		HandleDownload(ctx, w, req, device.State.Streams[1])
 	})
