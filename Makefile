@@ -26,6 +26,8 @@ rebuild:
 	GOOS=linux GOARCH=arm GOFLAGS=-a $(MAKE) binaries-all
 	GOOS=darwin GOARCH=amd64 GOFLAGS=-a $(MAKE) binaries-all
 
+ci: rebuild
+
 all: rebuild
 
 binaries-all: $(BUILDARCH)/fake-device
