@@ -215,3 +215,12 @@ func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.
 	_, err = rw.WriteReply(reply)
 	return
 }
+
+func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	if query.Identity.Name != "" {
+		device.State.Identity.Device = query.Identity.Name
+	}
+	reply := makeStatusReply(device)
+	_, err = rw.WriteReply(reply)
+	return
+}
