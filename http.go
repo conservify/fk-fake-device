@@ -89,7 +89,7 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	log.Printf("(http) Downloading (%d -> %d)", start, end)
 	log.Printf("(http) Downloading (%d -> %d) %d bytes", start_position, end_position, length)
 
-	w.Header().Add("Fk-Sync", fmt.Sprintf("%d, %d", start, end))
+	w.Header().Add("Fk-Blocks", fmt.Sprintf("%d, %d", start, end))
 
 	file, err := stream.OpenFile()
 	if err != nil {
