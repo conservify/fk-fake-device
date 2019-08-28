@@ -224,3 +224,10 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 	_, err = rw.WriteReply(reply)
 	return
 }
+
+func handleRecordingControl(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	device.State.Recording = query.Recording.Enabled > 0
+	reply := makeStatusReply(device)
+	_, err = rw.WriteReply(reply)
+	return
+}

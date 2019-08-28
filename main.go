@@ -160,6 +160,7 @@ type HardwareState struct {
 	Identity      pb.Identity
 	Streams       [2]*StreamState
 	ReadingsReady bool
+	Recording     bool
 }
 
 type FakeDevice struct {
@@ -255,6 +256,7 @@ func main() {
 	dispatcher.AddHandler(pb.QueryType_QUERY_TAKE_READINGS, handleQueryTakeReadings)
 	dispatcher.AddHandler(pb.QueryType_QUERY_GET_READINGS, handleQueryReadings)
 	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE, handleConfigure)
+	dispatcher.AddHandler(pb.QueryType_QUERY_RECORDING_CONTROL, handleRecordingControl)
 
 	for _, device := range devices {
 		device.Start(dispatcher)
