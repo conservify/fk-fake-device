@@ -203,7 +203,7 @@ func (hs *HttpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		handler := hs.dispatcher.handlers[wireQuery.Type]
 		if handler == nil {
 			rw.WriteError("Unknown message.")
-			log.Printf("Error handling RPC %v", "No handler")
+			log.Printf("Error handling RPC %v (%v)", "No handler", wireQuery.Type)
 			return
 		}
 
