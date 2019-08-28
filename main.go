@@ -161,6 +161,7 @@ type HardwareState struct {
 	Streams       [2]*StreamState
 	ReadingsReady bool
 	Recording     bool
+	StartedTime   uint64
 }
 
 type FakeDevice struct {

@@ -13,12 +13,21 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 	used := uint32(device.State.Streams[0].Size + device.State.Streams[1].Size)
 	installed := uint32(512 * 1024 * 1024)
 
+	recording := 0
+	if device.State.Recording {
+		recording = 1
+	}
+
 	return &pb.HttpReply{
 		Type: pb.ReplyType_REPLY_STATUS,
 		Status: &pb.Status{
 			Version:  1,
 			Uptime:   1,
 			Identity: &device.State.Identity,
+			Recording: &pb.Recording{
+				Enabled:     uint32(recording),
+				StartedTime: device.State.StartedTime,
+			},
 			Memory: &pb.MemoryStatus{
 				SramAvailable:           128 * 1024,
 				ProgramFlashAvailable:   600 * 1024,
@@ -226,7 +235,13 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 }
 
 func handleRecordingControl(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	device.State.Recording = query.Recording.Enabled > 0
+	if query.Recording.Enabled > 0 {
+		device.State.Recording = true
+		device.State.StartedTime = uint64(time.Now().Unix())
+	} else {
+		device.State.Recording = false
+		device.State.StartedTime = 0
+	}
 	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)
 	return
