@@ -2,11 +2,21 @@ package main
 
 import (
 	"context"
+	"crypto/sha1"
 	"math/rand"
 	"time"
 
 	pb "github.com/fieldkit/app-protocol"
 )
+
+func generateModuleId(device *FakeDevice, m *pb.ModuleCapabilities) *pb.ModuleCapabilities {
+	hasher := sha1.New()
+	hasher.Write([]byte(device.Name))
+	hasher.Write([]byte(m.Name))
+	moduleID := hasher.Sum(nil)
+	m.Id = moduleID
+	return m
+}
 
 func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 	now := time.Now()
@@ -72,54 +82,54 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			},
 		},
 		Modules: []*pb.ModuleCapabilities{
-			&pb.ModuleCapabilities{
-				Id:   0,
-				Name: "Water Quality Module",
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 0,
+				Name:     "Water Quality Module",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
-						Id:            0,
+						Number:        0,
 						Name:          "pH",
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
 				},
-			},
-			&pb.ModuleCapabilities{
-				Id:   1,
-				Name: "Water Quality Module",
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 1,
+				Name:     "Water Quality Module",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
-						Id:            0,
+						Number:        0,
 						Name:          "Dissolved Oxygen",
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
 				},
-			},
-			&pb.ModuleCapabilities{
-				Id:   2,
-				Name: "Ocean Module",
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 2,
+				Name:     "Ocean Module",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
-						Id:            0,
+						Number:        0,
 						Name:          "Conductivity",
 						UnitOfMeasure: "µS/cm",
 						Frequency:     60,
 					},
 					&pb.SensorCapabilities{
-						Id:            1,
+						Number:        1,
 						Name:          "Temperature",
 						UnitOfMeasure: "C",
 						Frequency:     60,
 					},
 					&pb.SensorCapabilities{
-						Id:            2,
+						Number:        2,
 						Name:          "Depth",
 						UnitOfMeasure: "m",
 						Frequency:     60,
 					},
 				},
-			},
+			}),
 		},
 	}
 }

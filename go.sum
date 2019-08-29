@@ -32,6 +32,8 @@ github.com/fieldkit/app-protocol v0.0.0-20190828174530-3b8e1982b28c h1:dF53dQblh
 github.com/fieldkit/app-protocol v0.0.0-20190828174530-3b8e1982b28c/go.mod h1:66+REnvMubqJ3o4jFTi7J94Qi3qIvyYdFLRJyteaF/s=
 github.com/fieldkit/app-protocol v0.0.0-20190828175343-22f574514b70 h1:nxJ15pcUjZb51XU+0SaG+Sqtx31BV3JBmQKgBga2kaw=
 github.com/fieldkit/app-protocol v0.0.0-20190828175343-22f574514b70/go.mod h1:66+REnvMubqJ3o4jFTi7J94Qi3qIvyYdFLRJyteaF/s=
+github.com/fieldkit/app-protocol v0.0.0-20190829182745-15e9163d58a1 h1:5dYx/N3L6b+ykNuruNN1urrC14L34exVPkMB8229d0Q=
+github.com/fieldkit/app-protocol v0.0.0-20190829182745-15e9163d58a1/go.mod h1:66+REnvMubqJ3o4jFTi7J94Qi3qIvyYdFLRJyteaF/s=
 github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
 github.com/fieldkit/cloud v0.0.0-20190529183849-5426fab875ec/go.mod h1:3t/uXpAzdatC0wZ+NbO7cu5VhheO3l43o9egSygavw8=
 github.com/fieldkit/data-protocol v0.0.0-20190801160434-f42e269cfc17 h1:5CA/2IgMY28dNq5tPlL5Xl8hVksrV3IOpAEdtyIObhQ=
@@ -40,6 +42,8 @@ github.com/fieldkit/data-protocol v0.0.0-20190816051220-4630e7bb9bb7 h1:fha4j9rt
 github.com/fieldkit/data-protocol v0.0.0-20190816051220-4630e7bb9bb7/go.mod h1:Atpguegf5+RPc1NjBgZ3oukS3WAqckGBcLjdRJOvY6A=
 github.com/fieldkit/data-protocol v0.0.0-20190820230419-9ec50e1aa169 h1:xTA0FrG0SI9kV3/sF35WeeVrBtXE53hOrX/zoPY1RDc=
 github.com/fieldkit/data-protocol v0.0.0-20190820230419-9ec50e1aa169/go.mod h1:Atpguegf5+RPc1NjBgZ3oukS3WAqckGBcLjdRJOvY6A=
+github.com/fieldkit/data-protocol v0.0.0-20190829182732-746f340ec776 h1:I2QVFLbHRfj1z26zvV4UBM/eb9xddK1T9GX77aXnnGY=
+github.com/fieldkit/data-protocol v0.0.0-20190829182732-746f340ec776/go.mod h1:Atpguegf5+RPc1NjBgZ3oukS3WAqckGBcLjdRJOvY6A=
 github.com/goadesign/goa v1.0.1-0.20171004030826-4cfe9e5eb207/go.mod h1:d/9lpuZBK7HFi/7O0oXfwvdoIl+nx2bwKqctZe/lQao=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/golang/protobuf v1.3.1 h1:YF8+flBXS5eO826T4nzqPrxfhQThhXl0YzfuUPu4SBg=
