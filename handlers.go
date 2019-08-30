@@ -151,7 +151,10 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 	depth := rand.Float32() * 10000
 
 	return &pb.HttpReply{
-		Type: pb.ReplyType_REPLY_READINGS,
+		Type:    pb.ReplyType_REPLY_READINGS,
+		Status:  status.Status,
+		Streams: status.Streams,
+		Modules: status.Modules,
 		LiveReadings: []*pb.LiveReadings{
 			&pb.LiveReadings{
 				Time: uint64(now.Unix()),
