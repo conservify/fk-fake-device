@@ -84,6 +84,19 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		Modules: []*pb.ModuleCapabilities{
 			generateModuleId(device, &pb.ModuleCapabilities{
 				Position: 0,
+				Flags:    1,
+				Name:     "Diagnostics Module",
+				Sensors: []*pb.SensorCapabilities{
+					&pb.SensorCapabilities{
+						Number:        0,
+						Name:          "memory",
+						UnitOfMeasure: "bytes",
+						Frequency:     60,
+					},
+				},
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 0,
 				Name:     "Water Quality Module",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
@@ -127,6 +140,13 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 						Name:          "Depth",
 						UnitOfMeasure: "m",
 						Frequency:     60,
+					},
+					&pb.SensorCapabilities{
+						Number:        2,
+						Name:          "Depth (mv)",
+						UnitOfMeasure: "mv",
+						Frequency:     60,
+						Flags:         1,
 					},
 				},
 			}),
@@ -173,7 +193,7 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 						Readings: []*pb.LiveSensorReading{
 							&pb.LiveSensorReading{
 								Sensor: status.Modules[1].Sensors[0],
-								Value:  dissolvedOxygen,
+								Value:  ph,
 							},
 						},
 					},
@@ -182,14 +202,23 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 						Readings: []*pb.LiveSensorReading{
 							&pb.LiveSensorReading{
 								Sensor: status.Modules[2].Sensors[0],
+								Value:  dissolvedOxygen,
+							},
+						},
+					},
+					&pb.LiveModuleReadings{
+						Module: status.Modules[3],
+						Readings: []*pb.LiveSensorReading{
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[3].Sensors[0],
 								Value:  conductivity,
 							},
 							&pb.LiveSensorReading{
-								Sensor: status.Modules[2].Sensors[1],
+								Sensor: status.Modules[3].Sensors[1],
 								Value:  temperature,
 							},
 							&pb.LiveSensorReading{
-								Sensor: status.Modules[2].Sensors[2],
+								Sensor: status.Modules[3].Sensors[2],
 								Value:  depth,
 							},
 						},
