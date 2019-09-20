@@ -204,17 +204,22 @@ func (fd *FakeDevice) FakeReadings() {
 func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 	devices := make([]*FakeDevice, len(names))
 	for i, name := range names {
-		hasher := sha1.New()
-		hasher.Write([]byte(name))
-		deviceID := hasher.Sum(nil)
+		deviceIdHasher := sha1.New()
+		deviceIdHasher.Write([]byte(fmt.Sprintf("station-%d", i)))
+		deviceID := deviceIdHasher.Sum(nil)
+
+		generationHasher := sha1.New()
+		generationHasher.Write([]byte(fmt.Sprintf("station-%d-generation", i)))
+		generation := generationHasher.Sum(nil)
 
 		state := HardwareState{
 			Identity: pb.Identity{
-				DeviceId: deviceID,
-				Device:   name,
-				Stream:   "",
-				Firmware: "91150ca5b2b09608058da273e1181d02cabb2d53",
-				Build:    "fk-bundled-fkb.elf_JACOB-WORK_20190809_214014",
+				DeviceId:   deviceID,
+				Generation: generation,
+				Device:     name,
+				Stream:     "",
+				Firmware:   "91150ca5b2b09608058da273e1181d02cabb2d53",
+				Build:      "fk-bundled-fkb.elf_JACOB-WORK_20190809_214014",
 			},
 			Streams: [2]*StreamState{
 				&StreamState{

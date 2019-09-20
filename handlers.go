@@ -35,7 +35,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			Uptime:   1,
 			Identity: &device.State.Identity,
 			Recording: &pb.Recording{
-				Enabled:     uint32(recording),
+				Enabled:     recording > 0,
 				StartedTime: device.State.StartedTime,
 			},
 			Memory: &pb.MemoryStatus{
@@ -275,7 +275,7 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 }
 
 func handleRecordingControl(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	if query.Recording.Enabled > 0 {
+	if query.Recording.Enabled {
 		device.State.Recording = true
 		device.State.StartedTime = uint64(time.Now().Unix())
 	} else {
