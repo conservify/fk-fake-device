@@ -61,6 +61,9 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				},
 			},
 		},
+		NetworkSettings: &pb.NetworkSettings{
+			Networks: device.State.Networks,
+		},
 		Streams: []*pb.DataStream{
 			&pb.DataStream{
 				Id:      0,
@@ -268,6 +271,9 @@ func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.
 func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if query.Identity.Name != "" {
 		device.State.Identity.Device = query.Identity.Name
+	}
+	if query.NetworkSettings != nil {
+		device.State.Networks = query.NetworkSettings.Networks
 	}
 	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)

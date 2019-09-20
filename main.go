@@ -159,6 +159,7 @@ func (ss *StreamState) Open() {
 type HardwareState struct {
 	Identity      pb.Identity
 	Streams       [2]*StreamState
+	Networks      []*pb.NetworkInfo
 	ReadingsReady bool
 	Recording     bool
 	StartedTime   uint64
