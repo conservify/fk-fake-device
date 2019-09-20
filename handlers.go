@@ -213,7 +213,7 @@ func makeBusyReply(delay uint32) *pb.HttpReply {
 
 func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if !device.State.ReadingsReady {
-		_, err = rw.WriteReply(makeBusyReply(0))
+		_, err = rw.WriteReply(makeBusyReply(1000))
 		return
 	}
 
@@ -226,11 +226,9 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if !device.State.ReadingsReady {
 		device.State.ReadingsReady = true
-		_, err = rw.WriteReply(makeBusyReply(0))
+		_, err = rw.WriteReply(makeBusyReply(1000))
 		return
 	}
-
-	device.State.ReadingsReady = false
 
 	reply := makeLiveReadingsReply(device)
 
