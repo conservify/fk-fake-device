@@ -269,7 +269,7 @@ func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.
 }
 
 func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	if query.Identity.Name != "" {
+	if query.Identity != nil && query.Identity.Name != "" {
 		device.State.Identity.Device = query.Identity.Name
 	}
 	if query.NetworkSettings != nil {
