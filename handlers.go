@@ -61,6 +61,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				},
 			},
 		},
+		LoraSettings: device.State.Lora,
 		NetworkSettings: &pb.NetworkSettings{
 			Networks: device.State.Networks,
 		},
@@ -274,6 +275,13 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 	}
 	if query.NetworkSettings != nil {
 		device.State.Networks = query.NetworkSettings.Networks
+	}
+	if query.LoraSettings != nil {
+		deviceEui := device.State.Lora.DeviceEui
+		device.State.Lora = query.LoraSettings
+		if device.State.Lora.DeviceEui == nil {
+			device.State.Lora.DeviceEui = deviceEui
+		}
 	}
 	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)

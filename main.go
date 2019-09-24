@@ -158,6 +158,7 @@ func (ss *StreamState) Open() {
 
 type HardwareState struct {
 	Identity      pb.Identity
+	Lora          *pb.LoraSettings
 	Streams       [2]*StreamState
 	Networks      []*pb.NetworkInfo
 	ReadingsReady bool
@@ -214,6 +215,9 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 		generation := generationHasher.Sum(nil)
 
 		state := HardwareState{
+			Lora: &pb.LoraSettings{
+				DeviceEui: deviceID,
+			},
 			Identity: pb.Identity{
 				DeviceId:   deviceID,
 				Generation: generation,
