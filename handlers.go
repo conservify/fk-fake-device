@@ -282,6 +282,7 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 		if device.State.Lora.DeviceEui == nil {
 			device.State.Lora.DeviceEui = deviceEui
 		}
+		device.State.Lora.Modifying = false
 	}
 	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)

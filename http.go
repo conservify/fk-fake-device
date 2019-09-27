@@ -71,7 +71,7 @@ func GetDownloadQuery(ctx context.Context, req *http.Request) *pb.DownloadQuery 
 	return queries[0].(*pb.DownloadQuery)
 }
 
-func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Request, stream *StreamState) error {
+func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Request, device *FakeDevice, stream *StreamState) error {
 	start := uint64(0)
 	end := stream.Record + 1
 
@@ -90,6 +90,8 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	log.Printf("(http) Downloading (%d -> %d) %d bytes", start_position, end_position, length)
 
 	w.Header().Add("Fk-Blocks", fmt.Sprintf("%d, %d", start, end))
+	w.Header().Add("Fk-Generation", fmt.Sprintf("%s", hex.EncodeToString(device.State.Identity.Generation)))
+	w.Header().Add("Fk-DeviceId", fmt.Sprintf("%s", hex.EncodeToString(device.State.Identity.DeviceId)))
 
 	file, err := stream.OpenFile()
 	if err != nil {
@@ -138,21 +140,13 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 
 	server := http.NewServeMux()
 	server.Handle("/fk/v1", hs)
-	server.HandleFunc("/fk/v1/download/0", func(w http.ResponseWriter, req *http.Request) {
-		ctx := context.Background()
-		HandleDownload(ctx, w, req, device.State.Streams[0])
-	})
 	server.HandleFunc("/fk/v1/download/data", func(w http.ResponseWriter, req *http.Request) {
 		ctx := context.Background()
-		HandleDownload(ctx, w, req, device.State.Streams[0])
-	})
-	server.HandleFunc("/fk/v1/download/1", func(w http.ResponseWriter, req *http.Request) {
-		ctx := context.Background()
-		HandleDownload(ctx, w, req, device.State.Streams[1])
+		HandleDownload(ctx, w, req, device, device.State.Streams[0])
 	})
 	server.HandleFunc("/fk/v1/download/meta", func(w http.ResponseWriter, req *http.Request) {
 		ctx := context.Background()
-		HandleDownload(ctx, w, req, device.State.Streams[1])
+		HandleDownload(ctx, w, req, device, device.State.Streams[1])
 	})
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
