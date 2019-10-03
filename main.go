@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"encoding/binary"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io"
@@ -20,15 +21,15 @@ import (
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func PublishAddressOverZeroConf(name string, port int) *zeroconf.Server {
+func PublishAddressOverZeroConf(name string, deviceId string, port int) *zeroconf.Server {
 	serviceType := "_fk._tcp"
 
-	server, err := zeroconf.Register(name, serviceType, "local.", port, []string{"txtv=0", "lo=1", "la=2"}, nil)
+	server, err := zeroconf.Register(deviceId, serviceType, "local.", port, []string{"txtv=0", "lo=1", "la=2"}, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Printf("Registered ZeroConf: %v %v", name, serviceType)
+	log.Printf("Registered ZeroConf: %v %v %v", name, serviceType, deviceId)
 
 	return server
 }
@@ -168,6 +169,7 @@ type HardwareState struct {
 
 type FakeDevice struct {
 	Name      string
+	DeviceId  string
 	Port      int
 	ZeroConf  *zeroconf.Server
 	WebServer *HttpServer
@@ -175,7 +177,7 @@ type FakeDevice struct {
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
-	fd.ZeroConf = PublishAddressOverZeroConf(fd.Name, fd.Port)
+	fd.ZeroConf = PublishAddressOverZeroConf(fd.Name, fd.DeviceId, fd.Port)
 
 	ws, err := NewHttpServer(fd, dispatcher)
 	if err != nil {
@@ -246,6 +248,7 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 
 		devices[i] = &FakeDevice{
 			Name:  name,
+			DeviceId: hex.EncodeToString(deviceID),
 			Port:  2380 + i,
 			State: &state,
 		}
