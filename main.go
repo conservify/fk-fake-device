@@ -23,7 +23,7 @@ import (
 func PublishAddressOverZeroConf(name string, port int) *zeroconf.Server {
 	serviceType := "_fk._tcp"
 
-	server, err := zeroconf.Register(name, serviceType, "local.", port, []string{"txtv=0", "lo=1", "la=2"}, nil)
+	server, err := zeroconf.Register(name, serviceType, "local.", port, nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -186,6 +186,7 @@ func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
 }
 
 func (fd *FakeDevice) Close() {
+	log.Printf("%s Close\n", fd.Name)
 	fd.ZeroConf.Shutdown()
 	fd.WebServer.Close()
 }
