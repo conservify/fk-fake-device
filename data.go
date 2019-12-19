@@ -109,12 +109,12 @@ func generateFakeReading(reading uint32) *pb.DataRecord {
 
 	return &pb.DataRecord{
 		Readings: &pb.Readings{
-			Time:    uint64(now.Unix()),
+			Time:    int64(now.Unix()),
 			Reading: reading,
 			Flags:   0,
 			Location: &pb.DeviceLocation{
 				Fix:       1,
-				Time:      uint64(now.Unix()),
+				Time:      int64(now.Unix()),
 				Longitude: -118.2709223,
 				Latitude:  34.0318047,
 				Altitude:  rand.Float32(),
