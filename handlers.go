@@ -60,19 +60,19 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					Percentage: 70.0,
 				},
 			},
-			Schedules: &pb.Schedules{
-				Readings: &pb.Schedule{
-					Interval: 10,
-				},
-				Lora: &pb.Schedule{
-					Interval: 300,
-				},
-				Network: &pb.Schedule{
-					Interval: 0,
-				},
-				Gps: &pb.Schedule{
-					Interval: 86400,
-				},
+		},
+		Schedules: &pb.Schedules{
+			Readings: &pb.Schedule{
+				Interval: 10,
+			},
+			Lora: &pb.Schedule{
+				Interval: 300,
+			},
+			Network: &pb.Schedule{
+				Interval: 0,
+			},
+			Gps: &pb.Schedule{
+				Interval: 86400,
 			},
 		},
 		LoraSettings: device.State.Lora,
