@@ -102,24 +102,11 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		Modules: []*pb.ModuleCapabilities{
 			generateModuleId(device, &pb.ModuleCapabilities{
 				Position: 0,
-				Flags:    1,
-				Name:     "Diagnostics Module",
+				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
-						Name:          "memory",
-						UnitOfMeasure: "bytes",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 0,
-				Name:     "Water Quality Module",
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "pH",
+						Name:          "ph",
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
@@ -133,44 +120,123 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(device, &pb.ModuleCapabilities{
 				Position: 1,
-				Name:     "Water Quality Module",
+				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
-						Name:          "Dissolved Oxygen",
+						Name:          "ec",
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
 				},
 			}),
 			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 2,
-				Name:     "Ocean Module",
+				Position: 1,
+				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
-						Name:          "Conductivity",
-						UnitOfMeasure: "µS/cm",
+						Name:          "temp",
+						UnitOfMeasure: "",
+						Frequency:     60,
+					},
+					&pb.SensorCapabilities{
+						Number:        0,
+						Name:          "zero",
+						UnitOfMeasure: "",
+						Frequency:     60,
+					},
+				},
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 1,
+				Name:     "water",
+				Sensors: []*pb.SensorCapabilities{
+					&pb.SensorCapabilities{
+						Number:        0,
+						Name:          "do",
+						UnitOfMeasure: "",
+						Frequency:     60,
+					},
+				},
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 1,
+				Name:     "water",
+				Sensors: []*pb.SensorCapabilities{
+					&pb.SensorCapabilities{
+						Number:        0,
+						Name:          "orp",
+						UnitOfMeasure: "",
+						Frequency:     60,
+					},
+				},
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 0,
+				Flags:    1,
+				Name:     "diagnostics",
+				Sensors: []*pb.SensorCapabilities{
+					&pb.SensorCapabilities{
+						Number:        0,
+						Name:          "battery_charge",
+						UnitOfMeasure: "%",
 						Frequency:     60,
 					},
 					&pb.SensorCapabilities{
 						Number:        1,
-						Name:          "Temperature",
+						Name:          "battery_voltage",
+						UnitOfMeasure: "mv",
+						Frequency:     60,
+					},
+					&pb.SensorCapabilities{
+						Number:        2,
+						Name:          "memory",
+						UnitOfMeasure: "bytes",
+						Frequency:     60,
+					},
+					&pb.SensorCapabilities{
+						Number:        3,
+						Name:          "uptime",
+						UnitOfMeasure: "ms",
+						Frequency:     60,
+					},
+					&pb.SensorCapabilities{
+						Number:        4,
+						Name:          "temperature",
 						UnitOfMeasure: "C",
 						Frequency:     60,
 					},
+				},
+			}),
+			generateModuleId(device, &pb.ModuleCapabilities{
+				Position: 0,
+				Flags:    1,
+				Name:     "random",
+				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
-						Number:        2,
-						Name:          "Depth",
-						UnitOfMeasure: "m",
+						Number:        0,
+						Name:          "random_0",
+						UnitOfMeasure: "",
+						Frequency:     60,
+					},
+					&pb.SensorCapabilities{
+						Number:        1,
+						Name:          "random_1",
+						UnitOfMeasure: "",
 						Frequency:     60,
 					},
 					&pb.SensorCapabilities{
 						Number:        2,
-						Name:          "Depth (mv)",
-						UnitOfMeasure: "mv",
+						Name:          "random_2",
+						UnitOfMeasure: "",
 						Frequency:     60,
-						Flags:         1,
+					},
+					&pb.SensorCapabilities{
+						Number:        3,
+						Name:          "random_3",
+						UnitOfMeasure: "",
+						Frequency:     60,
 					},
 				},
 			}),
@@ -184,15 +250,84 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 	return
 }
 
+func makeDiagnosticsReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
+	return &pb.LiveModuleReadings{
+		Module: status.Modules[0],
+		Readings: []*pb.LiveSensorReading{
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[5].Sensors[0],
+				Value:  0,
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[5].Sensors[1],
+				Value:  0,
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[5].Sensors[2],
+				Value:  0,
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[5].Sensors[3],
+				Value:  0,
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[5].Sensors[4],
+				Value:  0,
+			},
+		},
+	}
+}
+
+func makeRandomReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
+	return &pb.LiveModuleReadings{
+		Module: status.Modules[0],
+		Readings: []*pb.LiveSensorReading{
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[6].Sensors[0],
+				Value:  rand.Float32(),
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[6].Sensors[1],
+				Value:  rand.Float32(),
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[6].Sensors[2],
+				Value:  rand.Float32(),
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[6].Sensors[3],
+				Value:  rand.Float32(),
+			},
+		},
+	}
+}
+
+func makeWaterReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
+	ph := float32(7.0) + (rand.Float32()*2 - 1)
+	return &pb.LiveModuleReadings{
+		Module: status.Modules[0],
+		Readings: []*pb.LiveSensorReading{
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[0].Sensors[0],
+				Value:  ph,
+			},
+			&pb.LiveSensorReading{
+				Sensor: status.Modules[0].Sensors[1],
+				Value:  0,
+			},
+		},
+	}
+}
+
 func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 	status := makeStatusReply(device)
 
 	now := time.Now()
-	ph := rand.Float32() * 7
-	conductivity := rand.Float32() * 100
-	dissolvedOxygen := rand.Float32() * 10
-	temperature := rand.Float32() * 30
-	depth := rand.Float32() * 10000
+	// ph := rand.Float32() * 7
+	// conductivity := rand.Float32() * 100
+	// dissolvedOxygen := rand.Float32() * 10
+	// temperature := rand.Float32() * 30
+	// depth := rand.Float32() * 10000
 
 	return &pb.HttpReply{
 		Type:    pb.ReplyType_REPLY_READINGS,
@@ -203,54 +338,9 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 			&pb.LiveReadings{
 				Time: uint64(now.Unix()),
 				Modules: []*pb.LiveModuleReadings{
-					&pb.LiveModuleReadings{
-						Module: status.Modules[0],
-						Readings: []*pb.LiveSensorReading{
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[0].Sensors[0],
-								Value:  ph,
-							},
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[0].Sensors[0],
-								Value:  0,
-							},
-						},
-					},
-					&pb.LiveModuleReadings{
-						Module: status.Modules[1],
-						Readings: []*pb.LiveSensorReading{
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[1].Sensors[0],
-								Value:  ph,
-							},
-						},
-					},
-					&pb.LiveModuleReadings{
-						Module: status.Modules[2],
-						Readings: []*pb.LiveSensorReading{
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[2].Sensors[0],
-								Value:  dissolvedOxygen,
-							},
-						},
-					},
-					&pb.LiveModuleReadings{
-						Module: status.Modules[3],
-						Readings: []*pb.LiveSensorReading{
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[3].Sensors[0],
-								Value:  conductivity,
-							},
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[3].Sensors[1],
-								Value:  temperature,
-							},
-							&pb.LiveSensorReading{
-								Sensor: status.Modules[3].Sensors[2],
-								Value:  depth,
-							},
-						},
-					},
+					makeDiagnosticsReadings(status),
+					makeRandomReadings(status),
+					makeWaterReadings(status),
 				},
 			},
 		},
