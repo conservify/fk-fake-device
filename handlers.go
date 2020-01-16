@@ -123,6 +123,12 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
+					&pb.SensorCapabilities{
+						Number:        0,
+						Name:          "zero",
+						UnitOfMeasure: "",
+						Frequency:     60,
+					},
 				},
 			}),
 			generateModuleId(device, &pb.ModuleCapabilities{
@@ -203,6 +209,10 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 							&pb.LiveSensorReading{
 								Sensor: status.Modules[0].Sensors[0],
 								Value:  ph,
+							},
+							&pb.LiveSensorReading{
+								Sensor: status.Modules[0].Sensors[0],
+								Value:  0,
 							},
 						},
 					},
