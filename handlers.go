@@ -304,18 +304,29 @@ func makeRandomReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 	}
 }
 
-func makeWaterReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
-	ph := float32(7.0) + (rand.Float32()*2 - 1)
+func makeWaterReadings(status *pb.HttpReply, moduleIndex int) *pb.LiveModuleReadings {
+	value := float32(7.0) + (rand.Float32()*2 - 1)
+	if moduleIndex == 0 {
+		return &pb.LiveModuleReadings{
+			Module: status.Modules[moduleIndex],
+			Readings: []*pb.LiveSensorReading{
+				&pb.LiveSensorReading{
+					Sensor: status.Modules[moduleIndex].Sensors[0],
+					Value:  value,
+				},
+				&pb.LiveSensorReading{
+					Sensor: status.Modules[moduleIndex].Sensors[1],
+					Value:  0,
+				},
+			},
+		}
+	}
 	return &pb.LiveModuleReadings{
-		Module: status.Modules[0],
+		Module: status.Modules[moduleIndex],
 		Readings: []*pb.LiveSensorReading{
 			&pb.LiveSensorReading{
-				Sensor: status.Modules[0].Sensors[0],
-				Value:  ph,
-			},
-			&pb.LiveSensorReading{
-				Sensor: status.Modules[0].Sensors[1],
-				Value:  0,
+				Sensor: status.Modules[moduleIndex].Sensors[0],
+				Value:  value,
 			},
 		},
 	}
@@ -342,7 +353,10 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 				Modules: []*pb.LiveModuleReadings{
 					makeDiagnosticsReadings(status),
 					makeRandomReadings(status),
-					makeWaterReadings(status),
+					makeWaterReadings(status, 0),
+					makeWaterReadings(status, 1),
+					makeWaterReadings(status, 2),
+					makeWaterReadings(status, 3),
 				},
 			},
 		},
