@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 	"crypto/sha1"
+	"fmt"
 	"math/rand"
 	"time"
 
 	pb "github.com/fieldkit/app-protocol"
 )
 
-func generateModuleId(device *FakeDevice, m *pb.ModuleCapabilities) *pb.ModuleCapabilities {
+func generateModuleId(position int, device *FakeDevice, m *pb.ModuleCapabilities) *pb.ModuleCapabilities {
 	hasher := sha1.New()
 	hasher.Write([]byte(device.Name))
 	hasher.Write([]byte(m.Name))
+	hasher.Write([]byte(fmt.Sprintf("%d", position)))
 	moduleID := hasher.Sum(nil)
 	m.Id = moduleID
 	return m
@@ -100,7 +102,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			},
 		},
 		Modules: []*pb.ModuleCapabilities{
-			generateModuleId(device, &pb.ModuleCapabilities{
+			generateModuleId(0, device, &pb.ModuleCapabilities{
 				Position: 0,
 				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
@@ -118,7 +120,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					},
 				},
 			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
+			generateModuleId(1, device, &pb.ModuleCapabilities{
 				Position: 1,
 				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
@@ -130,8 +132,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					},
 				},
 			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 1,
+			generateModuleId(2, device, &pb.ModuleCapabilities{
+				Position: 2,
 				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
@@ -148,8 +150,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					},
 				},
 			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 1,
+			generateModuleId(3, device, &pb.ModuleCapabilities{
+				Position: 3,
 				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
@@ -160,8 +162,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					},
 				},
 			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 1,
+			generateModuleId(4, device, &pb.ModuleCapabilities{
+				Position: 4,
 				Name:     "water",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
@@ -172,8 +174,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					},
 				},
 			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 0,
+			generateModuleId(0xff, device, &pb.ModuleCapabilities{
+				Position: 0xff,
 				Flags:    1,
 				Name:     "diagnostics",
 				Sensors: []*pb.SensorCapabilities{
@@ -209,8 +211,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					},
 				},
 			}),
-			generateModuleId(device, &pb.ModuleCapabilities{
-				Position: 0,
+			generateModuleId(0xff, device, &pb.ModuleCapabilities{
+				Position: 0xff,
 				Flags:    1,
 				Name:     "random",
 				Sensors: []*pb.SensorCapabilities{
