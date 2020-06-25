@@ -65,7 +65,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		},
 		Schedules: &pb.Schedules{
 			Readings: &pb.Schedule{
-				Interval: 10,
+				Interval: 60,
 			},
 			Lora: &pb.Schedule{
 				Interval: 300,
