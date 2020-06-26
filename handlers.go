@@ -66,20 +66,6 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			},
 			Logs: lorem.Paragraph(10, 10),
 		},
-		Schedules: &pb.Schedules{
-			Readings: &pb.Schedule{
-				Interval: 60,
-			},
-			Lora: &pb.Schedule{
-				Interval: 300,
-			},
-			Network: &pb.Schedule{
-				Interval: 0,
-			},
-			Gps: &pb.Schedule{
-				Interval: 86400,
-			},
-		},
 		LoraSettings: device.State.Lora,
 		NetworkSettings: &pb.NetworkSettings{
 			Networks: device.State.Networks,
@@ -246,6 +232,20 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				},
 			}),
 		},
+		Schedules: &pb.Schedules{
+			Readings: &pb.Schedule{
+				Interval: 160,
+			},
+			Lora: &pb.Schedule{
+				Interval: 300,
+			},
+			Network: &pb.Schedule{
+				Interval: 0,
+			},
+			Gps: &pb.Schedule{
+				Interval: 86400,
+			},
+		},
 	}
 }
 
@@ -346,10 +346,11 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 	// depth := rand.Float32() * 10000
 
 	return &pb.HttpReply{
-		Type:    pb.ReplyType_REPLY_READINGS,
-		Status:  status.Status,
-		Streams: status.Streams,
-		Modules: status.Modules,
+		Type:      pb.ReplyType_REPLY_READINGS,
+		Status:    status.Status,
+		Streams:   status.Streams,
+		Modules:   status.Modules,
+		Schedules: status.Schedules,
 		LiveReadings: []*pb.LiveReadings{
 			&pb.LiveReadings{
 				Time: uint64(now.Unix()),
