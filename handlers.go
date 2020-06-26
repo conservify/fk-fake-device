@@ -8,6 +8,8 @@ import (
 	"time"
 
 	pb "github.com/fieldkit/app-protocol"
+
+	"github.com/drhodes/golorem"
 )
 
 func generateModuleId(position int, device *FakeDevice, m *pb.ModuleCapabilities) *pb.ModuleCapabilities {
@@ -62,6 +64,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					Percentage: 70.0,
 				},
 			},
+			Logs: lorem.Paragraph(10, 10),
 		},
 		Schedules: &pb.Schedules{
 			Readings: &pb.Schedule{
