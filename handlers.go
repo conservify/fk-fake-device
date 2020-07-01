@@ -93,7 +93,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		Modules: []*pb.ModuleCapabilities{
 			generateModuleId(0, device, &pb.ModuleCapabilities{
 				Position: 0,
-				Name:     "water",
+				Name:     "water.ph",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -101,17 +101,11 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "zero",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
 				},
 			}),
 			generateModuleId(1, device, &pb.ModuleCapabilities{
 				Position: 1,
-				Name:     "water",
+				Name:     "water.ec",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -123,7 +117,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(2, device, &pb.ModuleCapabilities{
 				Position: 2,
-				Name:     "water",
+				Name:     "water.temp",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -131,17 +125,11 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 						UnitOfMeasure: "",
 						Frequency:     60,
 					},
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "zero",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
 				},
 			}),
 			generateModuleId(3, device, &pb.ModuleCapabilities{
 				Position: 3,
-				Name:     "water",
+				Name:     "water.do",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -153,7 +141,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(4, device, &pb.ModuleCapabilities{
 				Position: 4,
-				Name:     "water",
+				Name:     "water.orp",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -257,7 +245,7 @@ func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQu
 
 func makeDiagnosticsReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 	return &pb.LiveModuleReadings{
-		Module: status.Modules[0],
+		Module: status.Modules[5],
 		Readings: []*pb.LiveSensorReading{
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[5].Sensors[0],
@@ -285,7 +273,7 @@ func makeDiagnosticsReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 
 func makeRandomReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 	return &pb.LiveModuleReadings{
-		Module: status.Modules[0],
+		Module: status.Modules[6],
 		Readings: []*pb.LiveSensorReading{
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[6].Sensors[0],
@@ -309,21 +297,6 @@ func makeRandomReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 
 func makeWaterReadings(status *pb.HttpReply, moduleIndex int) *pb.LiveModuleReadings {
 	value := float32(7.0) + (rand.Float32()*2 - 1)
-	if moduleIndex == 0 {
-		return &pb.LiveModuleReadings{
-			Module: status.Modules[moduleIndex],
-			Readings: []*pb.LiveSensorReading{
-				&pb.LiveSensorReading{
-					Sensor: status.Modules[moduleIndex].Sensors[0],
-					Value:  value,
-				},
-				&pb.LiveSensorReading{
-					Sensor: status.Modules[moduleIndex].Sensors[1],
-					Value:  0,
-				},
-			},
-		}
-	}
 	return &pb.LiveModuleReadings{
 		Module: status.Modules[moduleIndex],
 		Readings: []*pb.LiveSensorReading{
@@ -355,12 +328,13 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 			&pb.LiveReadings{
 				Time: uint64(now.Unix()),
 				Modules: []*pb.LiveModuleReadings{
+					makeWaterReadings(status, 0), // ph
+					makeWaterReadings(status, 1), // ec
+					makeWaterReadings(status, 2), // temp
+					makeWaterReadings(status, 3), // do
+					makeWaterReadings(status, 4), // orp
 					makeDiagnosticsReadings(status),
 					makeRandomReadings(status),
-					makeWaterReadings(status, 0),
-					makeWaterReadings(status, 1),
-					makeWaterReadings(status, 2),
-					makeWaterReadings(status, 3),
 				},
 			},
 		},
