@@ -45,14 +45,9 @@ func GetDownloadQuery(ctx context.Context, req *http.Request) *pb.DownloadQuery 
 	}
 
 	if len(queries) == 0 {
-		start_str := req.URL.Query()["start"]
-		end_str := req.URL.Query()["end"]
-		if len(start_str) == 1 && len(end_str) == 1 {
-			start, err := strconv.Atoi(start_str[0])
-			if err != nil {
-				panic(err)
-			}
-			end, err := strconv.Atoi(end_str[0])
+		startStr := req.URL.Query()["first"]
+		if len(startStr) == 1 {
+			start, err := strconv.Atoi(startStr[0])
 			if err != nil {
 				panic(err)
 			}
@@ -60,7 +55,6 @@ func GetDownloadQuery(ctx context.Context, req *http.Request) *pb.DownloadQuery 
 				Ranges: []*pb.Range{
 					&pb.Range{
 						Start: uint32(start),
-						End:   uint32(end),
 					},
 				},
 			}
@@ -79,15 +73,14 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	if query != nil {
 		log.Printf("%v", query)
 		start = uint64(query.Ranges[0].Start)
-		end = uint64(query.Ranges[0].End)
 	}
 
-	start_position := stream.PositionOf(start)
-	end_position := stream.PositionOf(end)
-	length := end_position - start_position
+	startPosition := stream.PositionOf(start)
+	endPosition := stream.PositionOf(end)
+	length := endPosition - startPosition
 
 	log.Printf("(http) Downloading (%d -> %d)", start, end)
-	log.Printf("(http) Downloading (%d -> %d) %d bytes", start_position, end_position, length)
+	log.Printf("(http) Downloading (%d -> %d) %d bytes", startPosition, endPosition, length)
 
 	w.Header().Add("Fk-Blocks", fmt.Sprintf("%d, %d", start, end))
 	w.Header().Add("Fk-Generation", fmt.Sprintf("%s", hex.EncodeToString(device.State.Identity.Generation)))
