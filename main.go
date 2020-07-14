@@ -175,6 +175,8 @@ type FakeDevice struct {
 	WebServer        *HttpServer
 	State            *HardwareState
 	ReadingsInterval int
+	Latitude         float32
+	Longitude        float32
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {

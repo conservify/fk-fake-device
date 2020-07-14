@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -54,8 +55,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				Fix:        1,
 				Time:       uint64(now.Unix()),
 				Satellites: 5,
-				Longitude:  -118.2709223,
-				Latitude:   34.0318047,
+				Longitude:  device.Longitude,
+				Latitude:   device.Latitude,
 				Altitude:   rand.Float32(),
 			},
 			Power: &pb.PowerStatus{
@@ -245,6 +246,10 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 }
 
 func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	if query.Locate != nil {
+		device.Latitude = query.Locate.Latitude
+		device.Longitude = query.Locate.Longitude
+	}
 	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)
 	return
@@ -372,6 +377,11 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 }
 
 func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	if query.Locate != nil {
+		device.Latitude = query.Locate.Latitude
+		device.Longitude = query.Locate.Longitude
+	}
+
 	if !device.State.ReadingsReady {
 		device.State.ReadingsReady = true
 		_, err = rw.WriteReply(makeBusyReply(1000))
@@ -402,6 +412,7 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 	if query.Schedules != nil {
 		if query.Schedules.Readings != nil {
 			device.ReadingsInterval = int(query.Schedules.Readings.Interval)
+			log.Printf("modified interval %v", device.ReadingsInterval)
 		}
 	}
 	reply := makeStatusReply(device)
