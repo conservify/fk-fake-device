@@ -65,6 +65,13 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				},
 			},
 			Logs: lorem.Paragraph(10, 10),
+			Firmware: &pb.Firmware{
+				Build:     "build",
+				Timestamp: uint64(now.Unix()),
+				Version:   "version",
+				Hash:      "hash",
+				Number:    "896",
+			},
 		},
 		LoraSettings: device.State.Lora,
 		NetworkSettings: &pb.NetworkSettings{
@@ -222,7 +229,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		},
 		Schedules: &pb.Schedules{
 			Readings: &pb.Schedule{
-				Interval: 160,
+				Interval: uint32(device.ReadingsInterval),
 			},
 			Lora: &pb.Schedule{
 				Interval: 300,
@@ -391,6 +398,11 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 			device.State.Lora.DeviceEui = deviceEui
 		}
 		device.State.Lora.Modifying = false
+	}
+	if query.Schedules != nil {
+		if query.Schedules.Readings != nil {
+			device.ReadingsInterval = int(query.Schedules.Readings.Interval)
+		}
 	}
 	reply := makeStatusReply(device)
 	_, err = rw.WriteReply(reply)

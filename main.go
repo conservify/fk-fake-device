@@ -168,12 +168,13 @@ type HardwareState struct {
 }
 
 type FakeDevice struct {
-	Name      string
-	DeviceId  string
-	Port      int
-	ZeroConf  *zeroconf.Server
-	WebServer *HttpServer
-	State     *HardwareState
+	Name             string
+	DeviceId         string
+	Port             int
+	ZeroConf         *zeroconf.Server
+	WebServer        *HttpServer
+	State            *HardwareState
+	ReadingsInterval int
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
@@ -248,10 +249,11 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 		}
 
 		devices[i] = &FakeDevice{
-			Name:  name,
-			DeviceId: hex.EncodeToString(deviceID),
-			Port:  2380 + i,
-			State: &state,
+			Name:             name,
+			DeviceId:         hex.EncodeToString(deviceID),
+			Port:             2380 + i,
+			State:            &state,
+			ReadingsInterval: 60,
 		}
 	}
 	return devices
