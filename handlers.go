@@ -101,7 +101,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		Modules: []*pb.ModuleCapabilities{
 			generateModuleId(0, device, &pb.ModuleCapabilities{
 				Position: 0,
-				Name:     "water.ph",
+				Name:     "modules.water.ph",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -113,7 +113,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(1, device, &pb.ModuleCapabilities{
 				Position: 1,
-				Name:     "water.ec",
+				Name:     "modules.water.ec",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -125,7 +125,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(2, device, &pb.ModuleCapabilities{
 				Position: 2,
-				Name:     "water.temp",
+				Name:     "modules.water.temp",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -137,7 +137,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(3, device, &pb.ModuleCapabilities{
 				Position: 3,
-				Name:     "water.do",
+				Name:     "modules.water.do",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -149,7 +149,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 			generateModuleId(4, device, &pb.ModuleCapabilities{
 				Position: 4,
-				Name:     "water.orp",
+				Name:     "modules.water.orp",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -162,7 +162,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(0xff, device, &pb.ModuleCapabilities{
 				Position: 0xff,
 				Flags:    1,
-				Name:     "diagnostics",
+				Name:     "modules.diagnostics",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -199,7 +199,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(0xff, device, &pb.ModuleCapabilities{
 				Position: 0xff,
 				Flags:    1,
-				Name:     "random",
+				Name:     "modules.random",
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
