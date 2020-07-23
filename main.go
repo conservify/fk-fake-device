@@ -228,6 +228,7 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 				DeviceId:   deviceID,
 				Generation: generation,
 				Device:     name,
+				Name:       name,
 				Stream:     "",
 				Firmware:   "91150ca5b2b09608058da273e1181d02cabb2d53",
 				Build:      "fk-bundled-fkb.elf_JACOB-WORK_20190809_214014",
