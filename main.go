@@ -213,11 +213,11 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 	devices := make([]*FakeDevice, len(names))
 	for i, name := range names {
 		deviceIdHasher := sha1.New()
-		deviceIdHasher.Write([]byte(fmt.Sprintf("station-%d", i)))
+		deviceIdHasher.Write([]byte(fmt.Sprintf("station-%s", name)))
 		deviceID := deviceIdHasher.Sum(nil)
 
 		generationHasher := sha1.New()
-		generationHasher.Write([]byte(fmt.Sprintf("station-%d-generation", i)))
+		generationHasher.Write([]byte(fmt.Sprintf("station-%s-generation", name)))
 		generation := generationHasher.Sum(nil)
 
 		state := HardwareState{
