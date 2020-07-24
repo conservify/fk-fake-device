@@ -110,7 +110,7 @@ func generateFakeReading(reading uint32) *pb.DataRecord {
 	return &pb.DataRecord{
 		Readings: &pb.Readings{
 			Time:    int64(now.Unix()),
-			Reading: reading,
+			Reading: uint64(reading),
 			Flags:   0,
 			Location: &pb.DeviceLocation{
 				Fix:       1,

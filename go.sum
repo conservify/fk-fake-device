@@ -82,6 +82,8 @@ github.com/fieldkit/data-protocol v0.0.0-20190927153819-e67e8fbfe0de h1:I7oeX/2N
 github.com/fieldkit/data-protocol v0.0.0-20190927153819-e67e8fbfe0de/go.mod h1:V84PpA6hUIiJoEDtWPaIGG5asd6cfYTJvSWHThD4YQE=
 github.com/fieldkit/data-protocol v0.0.0-20191202145046-f42f1bb26c67 h1:89QO1Y63+yULyo2mEx2vRIk2n8U6Gx7fsToTLwuQQiY=
 github.com/fieldkit/data-protocol v0.0.0-20191202145046-f42f1bb26c67/go.mod h1:V84PpA6hUIiJoEDtWPaIGG5asd6cfYTJvSWHThD4YQE=
+github.com/fieldkit/data-protocol v0.0.0-20200619180538-c9996b976b05 h1:pPR3zXSEdttT96XiyoL68Kt2RiUPuj+QYnC5jMVQLGw=
+github.com/fieldkit/data-protocol v0.0.0-20200619180538-c9996b976b05/go.mod h1:/5cSfo9D8do5ubIYR2+BuiHgQSkti13i/pAFNLNGQqw=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=

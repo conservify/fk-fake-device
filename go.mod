@@ -12,7 +12,7 @@ require (
 	github.com/fieldkit/app-protocol v0.0.0-20200619180509-02c25a77bb68
 	github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb // indirect
 	github.com/fieldkit/cloud v0.0.0-20190919194814-025e05412027 // indirect
-	github.com/fieldkit/data-protocol v0.0.0-20191202145046-f42f1bb26c67
+	github.com/fieldkit/data-protocol v0.0.0-20200619180538-c9996b976b05
 	github.com/goadesign/goa v2.0.5+incompatible // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c
