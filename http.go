@@ -13,6 +13,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	pb "github.com/fieldkit/app-protocol"
+	pbatlas "github.com/fieldkit/atlas-protocol"
 )
 
 type HttpServer struct {
@@ -71,7 +72,6 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 
 	query := GetDownloadQuery(ctx, req)
 	if query != nil {
-		log.Printf("%v", query)
 		start = uint64(query.Ranges[0].Start)
 	}
 
@@ -123,6 +123,48 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	return nil
 }
 
+func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Request, device *FakeDevice, position int) error {
+	log.Printf("(http) Request: %v %v", req.RemoteAddr, req.Method)
+
+	contentType := req.Header.Get("Content-Type")
+
+	var reader io.Reader = req.Body
+
+	/* Hack to support hex encoded encoding. */
+	hexEncoding := contentType == "text/plain"
+	if hexEncoding {
+		reader = hex.NewDecoder(req.Body)
+	}
+
+	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
+		rw := &HttpReplyWriter{
+			hexEncoding: hexEncoding,
+			res:         res,
+		}
+
+		buf := proto.NewBuffer(bytes)
+		wireQuery := &pbatlas.WireAtlasQuery{}
+		err = buf.Unmarshal(wireQuery)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Printf("(http) Atlas Query: %v", wireQuery)
+
+		reply := generateAtlasStatus(device, position, true)
+		_, err = rw.WriteBytes(reply)
+
+		log.Printf("(http) Atlas Reply: %v", len(reply))
+
+		return nil, io.EOF
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
 func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, error) {
 	hs := &HttpServer{
 		dispatcher: dispatcher,
@@ -140,6 +182,22 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 	server.HandleFunc("/fk/v1/download/meta", func(w http.ResponseWriter, req *http.Request) {
 		ctx := context.Background()
 		HandleDownload(ctx, w, req, device, device.State.Streams[1])
+	})
+	server.HandleFunc("/fk/v1/modules/0", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleModule(ctx, w, req, device, 0)
+	})
+	server.HandleFunc("/fk/v1/modules/1", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleModule(ctx, w, req, device, 1)
+	})
+	server.HandleFunc("/fk/v1/modules/2", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleModule(ctx, w, req, device, 2)
+	})
+	server.HandleFunc("/fk/v1/modules/3", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleModule(ctx, w, req, device, 3)
 	})
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
@@ -244,20 +302,18 @@ func (rw *HttpReplyWriter) WriteReply(m *pb.HttpReply) (int, error) {
 	buf.EncodeRawBytes(data)
 	bytes := buf.Bytes()
 
-	if rw.hexEncoding {
-		rw.size += hex.EncodedLen(len(bytes)) /* This is just N * 2 */
-	} else {
-		rw.size += len(bytes)
-	}
-
-	rw.WriteHeaders()
-
 	log.Printf("(http) Writing %d bytes", len(bytes))
 
 	return rw.WriteBytes(bytes)
 }
 
 func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
+	if rw.hexEncoding {
+		rw.size += hex.EncodedLen(len(bytes)) /* This is just N * 2 */
+	} else {
+		rw.size += len(bytes)
+	}
+
 	rw.WriteHeaders()
 
 	if rw.hexEncoding {

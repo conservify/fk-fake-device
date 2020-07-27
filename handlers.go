@@ -8,10 +8,53 @@ import (
 	"math/rand"
 	"time"
 
-	pb "github.com/fieldkit/app-protocol"
-
 	"github.com/drhodes/golorem"
+
+	"github.com/golang/protobuf/proto"
+
+	pb "github.com/fieldkit/app-protocol"
+	pbatlas "github.com/fieldkit/atlas-protocol"
 )
+
+func generateAtlasStatus(device *FakeDevice, index int, delimitted bool) []byte {
+	value := uint32(0)
+
+	module := device.Modules[index]
+
+	reply := &pbatlas.WireAtlasReply{
+		Type: pbatlas.ReplyType_REPLY_STATUS,
+		Calibration: &pbatlas.AtlasCalibrationStatus{
+			Type: module.SensorType,
+			Raw:  value,
+		},
+	}
+
+	switch module.SensorType {
+	case pbatlas.SensorType_SENSOR_PH:
+		reply.Calibration.Ph = pbatlas.PhCalibrations(value)
+	case pbatlas.SensorType_SENSOR_DO:
+		reply.Calibration.DissolvedOxygen = pbatlas.DoCalibrations(value)
+	case pbatlas.SensorType_SENSOR_TEMP:
+		reply.Calibration.Temp = pbatlas.TempCalibrations(value)
+	case pbatlas.SensorType_SENSOR_ORP:
+		reply.Calibration.Orp = pbatlas.OrpCalibrations(value)
+	case pbatlas.SensorType_SENSOR_EC:
+		reply.Calibration.Ec = pbatlas.EcCalibrations(value)
+	}
+
+	data, err := proto.Marshal(reply)
+	if err != nil {
+		panic(err)
+	}
+
+	if delimitted {
+		buf := proto.NewBuffer(make([]byte, 0))
+		buf.EncodeRawBytes(data)
+		return buf.Bytes()
+	}
+
+	return data
+}
 
 func generateModuleId(position int, device *FakeDevice, m *pb.ModuleCapabilities) *pb.ModuleCapabilities {
 	hasher := sha1.New()
@@ -102,6 +145,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(0, device, &pb.ModuleCapabilities{
 				Position: 0,
 				Name:     "modules.water.ph",
+				Status:   generateAtlasStatus(device, 0, false),
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -114,6 +158,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(1, device, &pb.ModuleCapabilities{
 				Position: 1,
 				Name:     "modules.water.ec",
+				Status:   generateAtlasStatus(device, 1, false),
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -126,6 +171,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(2, device, &pb.ModuleCapabilities{
 				Position: 2,
 				Name:     "modules.water.temp",
+				Status:   generateAtlasStatus(device, 1, false),
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -138,6 +184,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(3, device, &pb.ModuleCapabilities{
 				Position: 3,
 				Name:     "modules.water.do",
+				Status:   generateAtlasStatus(device, 3, false),
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -150,6 +197,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(4, device, &pb.ModuleCapabilities{
 				Position: 4,
 				Name:     "modules.water.orp",
+				Status:   generateAtlasStatus(device, 4, false),
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,
@@ -261,23 +309,23 @@ func makeDiagnosticsReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 		Readings: []*pb.LiveSensorReading{
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[5].Sensors[0],
-				Value:  0,
+				Value:  68,
 			},
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[5].Sensors[1],
-				Value:  0,
+				Value:  4000,
 			},
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[5].Sensors[2],
-				Value:  0,
+				Value:  1024 * 20,
 			},
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[5].Sensors[3],
-				Value:  0,
+				Value:  10000,
 			},
 			&pb.LiveSensorReading{
 				Sensor: status.Modules[5].Sensors[4],
-				Value:  0,
+				Value:  22,
 			},
 		},
 	}

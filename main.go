@@ -19,6 +19,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	pb "github.com/fieldkit/app-protocol"
+	pbatlas "github.com/fieldkit/atlas-protocol"
 )
 
 func PublishAddressOverZeroConf(name string, deviceId string, port int) *zeroconf.Server {
@@ -167,6 +168,11 @@ type HardwareState struct {
 	StartedTime   uint64
 }
 
+type FakeModule struct {
+	SensorType  pbatlas.SensorType
+	Calibration uint32
+}
+
 type FakeDevice struct {
 	Name             string
 	DeviceId         string
@@ -177,6 +183,7 @@ type FakeDevice struct {
 	ReadingsInterval int
 	Latitude         float32
 	Longitude        float32
+	Modules          []*FakeModule
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
@@ -257,6 +264,23 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 			Port:             2380 + i,
 			State:            &state,
 			ReadingsInterval: 60,
+			Modules: []*FakeModule{
+				&FakeModule{
+					SensorType: pbatlas.SensorType_SENSOR_PH,
+				},
+				&FakeModule{
+					SensorType: pbatlas.SensorType_SENSOR_EC,
+				},
+				&FakeModule{
+					SensorType: pbatlas.SensorType_SENSOR_TEMP,
+				},
+				&FakeModule{
+					SensorType: pbatlas.SensorType_SENSOR_DO,
+				},
+				&FakeModule{
+					SensorType: pbatlas.SensorType_SENSOR_ORP,
+				},
+			},
 		}
 	}
 	return devices
