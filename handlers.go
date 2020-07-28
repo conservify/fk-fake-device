@@ -113,7 +113,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				Timestamp: uint64(now.Unix()),
 				Version:   "version",
 				Hash:      "hash",
-				Number:    "896",
+				Number:    "590",
 			},
 		},
 		LoraSettings: device.State.Lora,

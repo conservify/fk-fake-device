@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -123,6 +124,26 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	return nil
 }
 
+func HandleFirmware(ctx context.Context, res http.ResponseWriter, req *http.Request, device *FakeDevice) error {
+	log.Printf("(http) Request: %v %v", req.RemoteAddr, req.Method)
+
+	contentType := req.Header.Get("Content-Type")
+
+	/* Hack to support hex encoded encoding. */
+	hexEncoding := contentType == "text/plain"
+
+	rw := &HttpReplyWriter{
+		hexEncoding: hexEncoding,
+		res:         res,
+	}
+
+	io.Copy(ioutil.Discard, req.Body)
+
+	_, err := rw.WriteBytes([]byte{})
+
+	return err
+}
+
 func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Request, device *FakeDevice, position int) error {
 	log.Printf("(http) Request: %v %v", req.RemoteAddr, req.Method)
 
@@ -164,35 +185,39 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 				case pbatlas.SensorType_SENSOR_PH:
 					switch pbatlas.PhCalibrateCommand(which) {
 					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_LOW:
-						device.Modules[position].Calibration |= 1
+						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_LOW)
 					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_MIDDLE:
-						device.Modules[position].Calibration |= 2
+						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_MIDDLE)
 					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_HIGH:
-						device.Modules[position].Calibration |= 4
+						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_HIGH)
 					}
 				case pbatlas.SensorType_SENSOR_ORP:
 					switch pbatlas.OrpCalibrateCommand(which) {
 					case pbatlas.OrpCalibrateCommand_CALIBRATE_ORP_SINGLE:
-						device.Modules[position].Calibration |= 1
+						device.Modules[position].Calibration |= uint32(pbatlas.OrpCalibrations_ORP_SINGLE)
 					}
 				case pbatlas.SensorType_SENSOR_DO:
 					switch pbatlas.DoCalibrateCommand(which) {
 					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ATMOSPHERE:
-						device.Modules[position].Calibration |= 1
+						device.Modules[position].Calibration |= uint32(pbatlas.DoCalibrations_DO_ATMOSPHERE)
 					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ZERO:
-						device.Modules[position].Calibration |= 2
+						device.Modules[position].Calibration |= uint32(pbatlas.DoCalibrations_DO_ZERO)
 					}
 				case pbatlas.SensorType_SENSOR_TEMP:
 					switch pbatlas.TempCalibrateCommand(which) {
 					case pbatlas.TempCalibrateCommand_CALIBRATE_TEMP_SINGLE:
-						device.Modules[position].Calibration |= 1
+						device.Modules[position].Calibration |= uint32(pbatlas.TempCalibrations_TEMP_SINGLE)
 					}
 				case pbatlas.SensorType_SENSOR_EC:
 					switch pbatlas.EcCalibrateCommand(which) {
 					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DRY:
+						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DRY)
 					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_SINGLE:
+						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_SINGLE)
 					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_LOW:
+						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DUAL_LOW)
 					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_HIGH:
+						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DUAL_HIGH)
 					}
 				}
 				log.Printf("(http) atlas-operation: SET %v %v (%v -> %v)", which, value, previous, device.Modules[position].Calibration)
@@ -248,6 +273,11 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 		ctx := context.Background()
 		HandleModule(ctx, w, req, device, 3)
 	})
+	server.HandleFunc("/fk/v1/upload/firmware", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleFirmware(ctx, w, req, device)
+	})
+
 	server.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Unknown URL: %s", req.URL)
 		notFoundHandler.ServeHTTP(w, req)
