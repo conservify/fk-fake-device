@@ -17,9 +17,8 @@ import (
 )
 
 func generateAtlasStatus(device *FakeDevice, index int, delimitted bool) []byte {
-	value := uint32(0)
-
 	module := device.Modules[index]
+	value := module.Calibration
 
 	reply := &pbatlas.WireAtlasReply{
 		Type: pbatlas.ReplyType_REPLY_STATUS,
@@ -171,7 +170,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			generateModuleId(2, device, &pb.ModuleCapabilities{
 				Position: 2,
 				Name:     "modules.water.temp",
-				Status:   generateAtlasStatus(device, 1, false),
+				Status:   generateAtlasStatus(device, 2, false),
 				Sensors: []*pb.SensorCapabilities{
 					&pb.SensorCapabilities{
 						Number:        0,

@@ -266,19 +266,24 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 			ReadingsInterval: 60,
 			Modules: []*FakeModule{
 				&FakeModule{
-					SensorType: pbatlas.SensorType_SENSOR_PH,
+					SensorType:  pbatlas.SensorType_SENSOR_PH,
+					Calibration: 0,
 				},
 				&FakeModule{
-					SensorType: pbatlas.SensorType_SENSOR_EC,
+					SensorType:  pbatlas.SensorType_SENSOR_EC,
+					Calibration: 0,
 				},
 				&FakeModule{
-					SensorType: pbatlas.SensorType_SENSOR_TEMP,
+					SensorType:  pbatlas.SensorType_SENSOR_TEMP,
+					Calibration: 0,
 				},
 				&FakeModule{
-					SensorType: pbatlas.SensorType_SENSOR_DO,
+					SensorType:  pbatlas.SensorType_SENSOR_DO,
+					Calibration: 0,
 				},
 				&FakeModule{
-					SensorType: pbatlas.SensorType_SENSOR_ORP,
+					SensorType:  pbatlas.SensorType_SENSOR_ORP,
+					Calibration: 0,
 				},
 			},
 		}

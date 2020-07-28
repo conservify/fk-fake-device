@@ -151,7 +151,56 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 
 		log.Printf("(http) Atlas Query: %v", wireQuery)
 
+		if wireQuery.Calibration != nil {
+			switch wireQuery.Calibration.Operation {
+			case pbatlas.CalibrationOperation_CALIBRATION_CLEAR:
+				device.Modules[position].Calibration = 0
+				log.Printf("(http) atlas-operation: CLEAR")
+			case pbatlas.CalibrationOperation_CALIBRATION_SET:
+				which := wireQuery.Calibration.Which
+				value := wireQuery.Calibration.Value
+				previous := device.Modules[position].Calibration
+				switch device.Modules[position].SensorType {
+				case pbatlas.SensorType_SENSOR_PH:
+					switch pbatlas.PhCalibrateCommand(which) {
+					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_LOW:
+						device.Modules[position].Calibration |= 1
+					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_MIDDLE:
+						device.Modules[position].Calibration |= 2
+					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_HIGH:
+						device.Modules[position].Calibration |= 4
+					}
+				case pbatlas.SensorType_SENSOR_ORP:
+					switch pbatlas.OrpCalibrateCommand(which) {
+					case pbatlas.OrpCalibrateCommand_CALIBRATE_ORP_SINGLE:
+						device.Modules[position].Calibration |= 1
+					}
+				case pbatlas.SensorType_SENSOR_DO:
+					switch pbatlas.DoCalibrateCommand(which) {
+					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ATMOSPHERE:
+						device.Modules[position].Calibration |= 1
+					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ZERO:
+						device.Modules[position].Calibration |= 2
+					}
+				case pbatlas.SensorType_SENSOR_TEMP:
+					switch pbatlas.TempCalibrateCommand(which) {
+					case pbatlas.TempCalibrateCommand_CALIBRATE_TEMP_SINGLE:
+						device.Modules[position].Calibration |= 1
+					}
+				case pbatlas.SensorType_SENSOR_EC:
+					switch pbatlas.EcCalibrateCommand(which) {
+					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DRY:
+					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_SINGLE:
+					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_LOW:
+					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_HIGH:
+					}
+				}
+				log.Printf("(http) atlas-operation: SET %v %v (%v -> %v)", which, value, previous, device.Modules[position].Calibration)
+			}
+		}
+
 		reply := generateAtlasStatus(device, position, true)
+
 		_, err = rw.WriteBytes(reply)
 
 		log.Printf("(http) Atlas Reply: %v", len(reply))
