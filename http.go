@@ -190,11 +190,15 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_MIDDLE)
 					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_HIGH:
 						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_HIGH)
+					default:
+						log.Printf("(http) unknown calibration")
 					}
 				case pbatlas.SensorType_SENSOR_ORP:
 					switch pbatlas.OrpCalibrateCommand(which) {
 					case pbatlas.OrpCalibrateCommand_CALIBRATE_ORP_SINGLE:
 						device.Modules[position].Calibration |= uint32(pbatlas.OrpCalibrations_ORP_SINGLE)
+					default:
+						log.Printf("(http) unknown calibration")
 					}
 				case pbatlas.SensorType_SENSOR_DO:
 					switch pbatlas.DoCalibrateCommand(which) {
@@ -202,11 +206,15 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 						device.Modules[position].Calibration |= uint32(pbatlas.DoCalibrations_DO_ATMOSPHERE)
 					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ZERO:
 						device.Modules[position].Calibration |= uint32(pbatlas.DoCalibrations_DO_ZERO)
+					default:
+						log.Printf("(http) unknown calibration")
 					}
 				case pbatlas.SensorType_SENSOR_TEMP:
 					switch pbatlas.TempCalibrateCommand(which) {
 					case pbatlas.TempCalibrateCommand_CALIBRATE_TEMP_SINGLE:
 						device.Modules[position].Calibration |= uint32(pbatlas.TempCalibrations_TEMP_SINGLE)
+					default:
+						log.Printf("(http) unknown calibration")
 					}
 				case pbatlas.SensorType_SENSOR_EC:
 					switch pbatlas.EcCalibrateCommand(which) {
@@ -218,7 +226,11 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DUAL_LOW)
 					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_HIGH:
 						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DUAL_HIGH)
+					default:
+						log.Printf("(http) unknown calibration")
 					}
+				default:
+					log.Printf("(http) unknown sensor")
 				}
 				log.Printf("(http) atlas-operation: SET %v %v (%v -> %v)", which, value, previous, device.Modules[position].Calibration)
 			}
