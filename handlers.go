@@ -292,6 +292,24 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 	}
 }
 
+func handleQueryScanNetworks(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
+	reply := &pb.HttpReply{
+		Type: pb.ReplyType_REPLY_SUCCESS,
+		NearbyNetworks: &pb.NearbyNetworks{
+			Networks: []*pb.NearbyNetwork{
+				&pb.NearbyNetwork{
+					Ssid: "Cottonwood",
+				},
+				&pb.NearbyNetwork{
+					Ssid: "Conservify",
+				},
+			},
+		},
+	}
+	_, err = rw.WriteReply(reply)
+	return
+}
+
 func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if query.Locate != nil {
 		device.Latitude = query.Locate.Latitude
@@ -412,11 +430,6 @@ func makeBusyReply(delay uint32) *pb.HttpReply {
 }
 
 func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	if !device.State.ReadingsReady {
-		_, err = rw.WriteReply(makeBusyReply(1000))
-		return
-	}
-
 	reply := makeLiveReadingsReply(device)
 
 	_, err = rw.WriteReply(reply)
@@ -429,14 +442,7 @@ func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.
 		device.Longitude = query.Locate.Longitude
 	}
 
-	if !device.State.ReadingsReady {
-		device.State.ReadingsReady = true
-		_, err = rw.WriteReply(makeBusyReply(1000))
-		return
-	}
-
 	reply := makeLiveReadingsReply(device)
-
 	_, err = rw.WriteReply(reply)
 	return
 }

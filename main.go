@@ -306,6 +306,7 @@ func main() {
 	dispatcher.AddHandler(pb.QueryType_QUERY_GET_READINGS, handleQueryReadings)
 	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE, handleConfigure)
 	dispatcher.AddHandler(pb.QueryType_QUERY_RECORDING_CONTROL, handleRecordingControl)
+	dispatcher.AddHandler(pb.QueryType_QUERY_SCAN_NETWORKS, handleQueryScanNetworks)
 
 	for _, device := range devices {
 		device.Start(dispatcher)
