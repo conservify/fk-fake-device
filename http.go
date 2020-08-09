@@ -97,7 +97,9 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 		res:         w,
 	}
 	rw.Prepare(int(length))
+	rw.WriteHeaders()
 
+	bytesWritten := 0
 	buffer := make([]byte, 1024)
 	for true {
 		header := RecordHeader{}
@@ -114,6 +116,8 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 			}
 
 			rw.WriteBytes(buffer[:nread])
+
+			bytesWritten += nread
 		} else {
 			file.Seek(int64(header.Size), 1)
 		}
@@ -369,6 +373,7 @@ type HttpReplyWriter struct {
 
 func (rw *HttpReplyWriter) WriteHeaders() error {
 	if !rw.headers {
+		log.Printf("(http) write headers %v", rw.size)
 		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
 		rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
 		rw.headers = true
@@ -399,10 +404,12 @@ func (rw *HttpReplyWriter) WriteReply(m *pb.HttpReply) (int, error) {
 }
 
 func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
-	if rw.hexEncoding {
-		rw.size += hex.EncodedLen(len(bytes)) /* This is just N * 2 */
-	} else {
-		rw.size += len(bytes)
+	if !rw.headers {
+		if rw.hexEncoding {
+			rw.size += hex.EncodedLen(len(bytes)) /* This is just N * 2 */
+		} else {
+			rw.size += len(bytes)
+		}
 	}
 
 	rw.WriteHeaders()
