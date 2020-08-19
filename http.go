@@ -97,7 +97,7 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 		res:         w,
 	}
 	rw.Prepare(int(length))
-	rw.WriteHeaders()
+	rw.WriteHeaders(200)
 
 	bytesWritten := 0
 	buffer := make([]byte, 1024)
@@ -143,9 +143,19 @@ func HandleFirmware(ctx context.Context, res http.ResponseWriter, req *http.Requ
 
 	io.Copy(ioutil.Discard, req.Body)
 
-	_, err := rw.WriteBytes([]byte{})
+	if false {
+		_, err := rw.WriteBytes([]byte{})
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := rw.WriteStatusBytes(500, []byte("{ \"sd_card\": true }"))
+		if err != nil {
+			return err
+		}
+	}
 
-	return err
+	return nil
 }
 
 func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Request, device *FakeDevice, position int) error {
@@ -371,11 +381,12 @@ type HttpReplyWriter struct {
 	res         http.ResponseWriter
 }
 
-func (rw *HttpReplyWriter) WriteHeaders() error {
+func (rw *HttpReplyWriter) WriteHeaders(statusCode int) error {
 	if !rw.headers {
 		log.Printf("(http) write headers %v", rw.size)
 		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
 		rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
+		rw.res.WriteHeader(statusCode)
 		rw.headers = true
 	}
 
@@ -403,6 +414,15 @@ func (rw *HttpReplyWriter) WriteReply(m *pb.HttpReply) (int, error) {
 	return rw.WriteBytes(bytes)
 }
 
+func (rw *HttpReplyWriter) WriteStatusBytes(statusCode int, bytes []byte) (int, error) {
+	rw.size = len(bytes)
+	err := rw.WriteHeaders(statusCode)
+	if err != nil {
+		return 0, err
+	}
+	return rw.WriteBytes(bytes)
+}
+
 func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
 	if !rw.headers {
 		if rw.hexEncoding {
@@ -412,7 +432,7 @@ func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
 		}
 	}
 
-	rw.WriteHeaders()
+	rw.WriteHeaders(200)
 
 	if rw.hexEncoding {
 		writer := hex.NewEncoder(rw.res)
