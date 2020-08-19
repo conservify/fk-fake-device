@@ -180,10 +180,10 @@ type FakeDevice struct {
 	ZeroConf         *zeroconf.Server
 	WebServer        *HttpServer
 	State            *HardwareState
-	ReadingsInterval int
 	Latitude         float32
 	Longitude        float32
 	Modules          []*FakeModule
+	ReadingsSchedule *pb.Schedule
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
@@ -261,11 +261,20 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 		}
 
 		devices[i] = &FakeDevice{
-			Name:             name,
-			DeviceId:         hex.EncodeToString(deviceID),
-			Port:             2380 + i,
-			State:            &state,
-			ReadingsInterval: 60,
+			Name:     name,
+			DeviceId: hex.EncodeToString(deviceID),
+			Port:     2380 + i,
+			State:    &state,
+			ReadingsSchedule: &pb.Schedule{
+				Interval: 60,
+				Intervals: []*pb.Interval{
+					&pb.Interval{
+						Start:    0,
+						End:      86400,
+						Interval: 60,
+					},
+				},
+			},
 			Modules: []*FakeModule{
 				&FakeModule{
 					SensorType:  pbatlas.SensorType_SENSOR_PH,

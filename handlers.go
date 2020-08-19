@@ -276,9 +276,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			}),
 		},
 		Schedules: &pb.Schedules{
-			Readings: &pb.Schedule{
-				Interval: uint32(device.ReadingsInterval),
-			},
+			Readings: device.ReadingsSchedule,
 			Lora: &pb.Schedule{
 				Interval: 300,
 			},
@@ -464,8 +462,13 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 	}
 	if query.Schedules != nil {
 		if query.Schedules.Readings != nil {
-			device.ReadingsInterval = int(query.Schedules.Readings.Interval)
-			log.Printf("modified interval %v", device.ReadingsInterval)
+			if query.Schedules.Readings.Intervals != nil {
+				for _, interval := range query.Schedules.Readings.Intervals {
+					log.Printf("interval: %v", interval)
+				}
+			}
+			device.ReadingsSchedule = query.Schedules.Readings
+			log.Printf("modified schedule: %v", *device.ReadingsSchedule)
 		}
 	}
 	reply := makeStatusReply(device)
