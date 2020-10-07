@@ -41,4 +41,7 @@ clean:
 run: build
 	$(BUILDARCH)/fake-device
 
+no-modules: build
+	$(BUILDARCH)/fake-device --no-modules
+
 .PHONY: build

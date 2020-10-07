@@ -36,7 +36,8 @@ func PublishAddressOverZeroConf(name string, deviceId string, port int) *zerocon
 }
 
 type Options struct {
-	Names string
+	Names     string
+	NoModules bool
 }
 
 type StreamState struct {
@@ -216,7 +217,7 @@ func (fd *FakeDevice) FakeReadings() {
 	}
 }
 
-func CreateFakeDevicesNamed(names []string) []*FakeDevice {
+func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 	devices := make([]*FakeDevice, len(names))
 	for i, name := range names {
 		deviceIdHasher := sha1.New()
@@ -298,6 +299,10 @@ func CreateFakeDevicesNamed(names []string) []*FakeDevice {
 				},
 			},
 		}
+
+		if noModules {
+			devices[i].Modules = make([]*FakeModule, 0)
+		}
 	}
 	return devices
 }
@@ -306,10 +311,11 @@ func main() {
 	o := Options{}
 
 	flag.StringVar(&o.Names, "names", "fake0", "")
+	flag.BoolVar(&o.NoModules, "no-modules", false, "")
 	flag.Parse()
 
 	names := strings.Split(o.Names, ",")
-	devices := CreateFakeDevicesNamed(names)
+	devices := CreateFakeDevicesNamed(names, o.NoModules)
 
 	dispatcher := NewDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)

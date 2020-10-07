@@ -65,6 +65,147 @@ func generateModuleId(position int, device *FakeDevice, m *pb.ModuleCapabilities
 	return m
 }
 
+func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
+	if len(device.Modules) == 0 {
+		return make([]*pb.ModuleCapabilities, 0)
+	}
+	return []*pb.ModuleCapabilities{
+		generateModuleId(0, device, &pb.ModuleCapabilities{
+			Position: 0,
+			Name:     "modules.water.ph",
+			Status:   generateAtlasStatus(device, 0, false),
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "ph",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+			},
+		}),
+		generateModuleId(1, device, &pb.ModuleCapabilities{
+			Position: 1,
+			Name:     "modules.water.ec",
+			Status:   generateAtlasStatus(device, 1, false),
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "ec",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+			},
+		}),
+		generateModuleId(2, device, &pb.ModuleCapabilities{
+			Position: 2,
+			Name:     "modules.water.temp",
+			Status:   generateAtlasStatus(device, 2, false),
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "temp",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+			},
+		}),
+		generateModuleId(3, device, &pb.ModuleCapabilities{
+			Position: 3,
+			Name:     "modules.water.do",
+			Status:   generateAtlasStatus(device, 3, false),
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "do",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+			},
+		}),
+		generateModuleId(4, device, &pb.ModuleCapabilities{
+			Position: 4,
+			Name:     "modules.water.orp",
+			Status:   generateAtlasStatus(device, 4, false),
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "orp",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+			},
+		}),
+		generateModuleId(0xff, device, &pb.ModuleCapabilities{
+			Position: 0xff,
+			Flags:    1,
+			Name:     "modules.diagnostics",
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "battery_charge",
+					UnitOfMeasure: "%",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        1,
+					Name:          "battery_voltage",
+					UnitOfMeasure: "mv",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        2,
+					Name:          "memory",
+					UnitOfMeasure: "bytes",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        3,
+					Name:          "uptime",
+					UnitOfMeasure: "ms",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        4,
+					Name:          "temperature",
+					UnitOfMeasure: "C",
+					Frequency:     60,
+				},
+			},
+		}),
+		generateModuleId(0xff, device, &pb.ModuleCapabilities{
+			Position: 0xff,
+			Flags:    1,
+			Name:     "modules.random",
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "random_0",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        1,
+					Name:          "random_1",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        2,
+					Name:          "random_2",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+				&pb.SensorCapabilities{
+					Number:        3,
+					Name:          "random_3",
+					UnitOfMeasure: "",
+					Frequency:     60,
+				},
+			},
+		}),
+	}
+}
+
 func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 	now := time.Now()
 	used := uint32(device.State.Streams[0].Size + device.State.Streams[1].Size)
@@ -120,6 +261,7 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 		NetworkSettings: &pb.NetworkSettings{
 			Networks: device.State.Networks,
 		},
+		Modules: makeModules(device),
 		Streams: []*pb.DataStream{
 			&pb.DataStream{
 				Id:      0,
@@ -139,141 +281,6 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 				Name:    "meta.fkpb",
 				Path:    "/fk/v1/download/meta",
 			},
-		},
-		Modules: []*pb.ModuleCapabilities{
-			generateModuleId(0, device, &pb.ModuleCapabilities{
-				Position: 0,
-				Name:     "modules.water.ph",
-				Status:   generateAtlasStatus(device, 0, false),
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "ph",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(1, device, &pb.ModuleCapabilities{
-				Position: 1,
-				Name:     "modules.water.ec",
-				Status:   generateAtlasStatus(device, 1, false),
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "ec",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(2, device, &pb.ModuleCapabilities{
-				Position: 2,
-				Name:     "modules.water.temp",
-				Status:   generateAtlasStatus(device, 2, false),
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "temp",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(3, device, &pb.ModuleCapabilities{
-				Position: 3,
-				Name:     "modules.water.do",
-				Status:   generateAtlasStatus(device, 3, false),
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "do",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(4, device, &pb.ModuleCapabilities{
-				Position: 4,
-				Name:     "modules.water.orp",
-				Status:   generateAtlasStatus(device, 4, false),
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "orp",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(0xff, device, &pb.ModuleCapabilities{
-				Position: 0xff,
-				Flags:    1,
-				Name:     "modules.diagnostics",
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "battery_charge",
-						UnitOfMeasure: "%",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        1,
-						Name:          "battery_voltage",
-						UnitOfMeasure: "mv",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        2,
-						Name:          "memory",
-						UnitOfMeasure: "bytes",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        3,
-						Name:          "uptime",
-						UnitOfMeasure: "ms",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        4,
-						Name:          "temperature",
-						UnitOfMeasure: "C",
-						Frequency:     60,
-					},
-				},
-			}),
-			generateModuleId(0xff, device, &pb.ModuleCapabilities{
-				Position: 0xff,
-				Flags:    1,
-				Name:     "modules.random",
-				Sensors: []*pb.SensorCapabilities{
-					&pb.SensorCapabilities{
-						Number:        0,
-						Name:          "random_0",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        1,
-						Name:          "random_1",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        2,
-						Name:          "random_2",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-					&pb.SensorCapabilities{
-						Number:        3,
-						Name:          "random_3",
-						UnitOfMeasure: "",
-						Frequency:     60,
-					},
-				},
-			}),
 		},
 		Schedules: &pb.Schedules{
 			Readings: device.ReadingsSchedule,
@@ -393,6 +400,20 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 	// temperature := rand.Float32() * 30
 	// depth := rand.Float32() * 10000
 
+	liveReadings := make([]*pb.LiveModuleReadings, 0)
+
+	if len(device.Modules) > 0 {
+		liveReadings = []*pb.LiveModuleReadings{
+			makeWaterReadings(status, 0), // ph
+			makeWaterReadings(status, 1), // ec
+			makeWaterReadings(status, 2), // temp
+			makeWaterReadings(status, 3), // do
+			makeWaterReadings(status, 4), // orp
+			makeDiagnosticsReadings(status),
+			makeRandomReadings(status),
+		}
+	}
+
 	return &pb.HttpReply{
 		Type:      pb.ReplyType_REPLY_READINGS,
 		Status:    status.Status,
@@ -401,16 +422,8 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 		Schedules: status.Schedules,
 		LiveReadings: []*pb.LiveReadings{
 			&pb.LiveReadings{
-				Time: uint64(now.Unix()),
-				Modules: []*pb.LiveModuleReadings{
-					makeWaterReadings(status, 0), // ph
-					makeWaterReadings(status, 1), // ec
-					makeWaterReadings(status, 2), // temp
-					makeWaterReadings(status, 3), // do
-					makeWaterReadings(status, 4), // orp
-					makeDiagnosticsReadings(status),
-					makeRandomReadings(status),
-				},
+				Time:    uint64(now.Unix()),
+				Modules: liveReadings,
 			},
 		},
 	}
