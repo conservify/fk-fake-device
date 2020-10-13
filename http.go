@@ -79,6 +79,7 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	startPosition := stream.PositionOf(start)
 	endPosition := stream.PositionOf(end)
 	length := endPosition - startPosition
+	headOnly := req.Method == "HEAD"
 
 	log.Printf("(http) Downloading (%d -> %d)", start, end)
 	log.Printf("(http) Downloading (%d -> %d) %d bytes", startPosition, endPosition, length)
@@ -89,14 +90,21 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 
 	file, err := stream.OpenFile()
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	rw := &HttpReplyWriter{
 		hexEncoding: false,
 		res:         w,
 	}
+
 	rw.Prepare(int(length))
+
+	if headOnly {
+		rw.WriteHeaders(204)
+		return nil
+	}
+
 	rw.WriteHeaders(200)
 
 	bytesWritten := 0
@@ -112,7 +120,7 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 			limited := io.LimitReader(file, int64(header.Size))
 			nread, err := io.ReadAtLeast(limited, buffer, int(header.Size))
 			if err != nil {
-				panic(err)
+				return nil
 			}
 
 			rw.WriteBytes(buffer[:nread])
@@ -384,8 +392,10 @@ type HttpReplyWriter struct {
 func (rw *HttpReplyWriter) WriteHeaders(statusCode int) error {
 	if !rw.headers {
 		log.Printf("(http) write headers %v", rw.size)
-		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
 		rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
+		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
+		rw.res.Header().Set("Fk-Bytes", fmt.Sprintf("%d", rw.size))
+		rw.res.Header().Set("Fk-Blocks", fmt.Sprintf("%d,%d", 0, 0))
 		rw.res.WriteHeader(statusCode)
 		rw.headers = true
 	}
