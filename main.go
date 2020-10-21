@@ -230,7 +230,7 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 
 		state := HardwareState{
 			Recording:   false,
-			StartedTime: uint64(time.Now().Unix() - 300),
+			StartedTime: 0, // uint64(time.Now().Unix() - 300),
 			Lora: &pb.LoraSettings{
 				DeviceEui: deviceID,
 			},
