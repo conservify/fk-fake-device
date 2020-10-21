@@ -229,7 +229,7 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 		generation := generationHasher.Sum(nil)
 
 		state := HardwareState{
-			Recording:   true,
+			Recording:   false,
 			StartedTime: uint64(time.Now().Unix() - 300),
 			Lora: &pb.LoraSettings{
 				DeviceEui: deviceID,
