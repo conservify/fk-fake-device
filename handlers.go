@@ -247,6 +247,9 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					Voltage:    3420.0,
 					Percentage: 70.0,
 				},
+				Solar: &pb.SolarStatus{
+					Voltage: 0020.0,
+				},
 			},
 			Logs: lorem.Paragraph(10, 10),
 			Firmware: &pb.Firmware{
