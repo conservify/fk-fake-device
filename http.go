@@ -392,10 +392,18 @@ type HttpReplyWriter struct {
 func (rw *HttpReplyWriter) WriteHeaders(statusCode int) error {
 	if !rw.headers {
 		log.Printf("(http) write headers %v", rw.size)
-		rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
-		rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
-		rw.res.Header().Set("Fk-Bytes", fmt.Sprintf("%d", rw.size))
-		rw.res.Header().Set("Fk-Blocks", fmt.Sprintf("%d,%d", 0, 0))
+		if len(rw.res.Header().Get("Content-Length")) == 0 {
+			rw.res.Header().Set("Content-Length", fmt.Sprintf("%d", rw.size))
+		}
+		if len(rw.res.Header().Get("Content-Type")) == 0 {
+			rw.res.Header().Set("Content-Type", "application/vnd.fk.data+binary")
+		}
+		if len(rw.res.Header().Get("Fk-Bytes")) == 0 {
+			rw.res.Header().Set("Fk-Bytes", fmt.Sprintf("%d", rw.size))
+		}
+		if len(rw.res.Header().Get("Fk-Blocks")) == 0 {
+			rw.res.Header().Set("Fk-Blocks", fmt.Sprintf("%d,%d", 0, 0))
+		}
 		rw.res.WriteHeader(statusCode)
 		rw.headers = true
 	}
