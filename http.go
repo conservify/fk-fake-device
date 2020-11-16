@@ -157,7 +157,7 @@ func HandleFirmware(ctx context.Context, res http.ResponseWriter, req *http.Requ
 			return err
 		}
 	} else {
-		_, err := rw.WriteStatusBytes(500, []byte("{ \"sdCard\": true }"))
+		_, err := rw.WriteStatusBytes(500, []byte("{ \"success\": true }"))
 		if err != nil {
 			return err
 		}

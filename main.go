@@ -36,8 +36,9 @@ func PublishAddressOverZeroConf(name string, deviceId string, port int) *zerocon
 }
 
 type Options struct {
-	Names     string
-	NoModules bool
+	Names         string
+	NoModules     bool
+	PrimeReadings int
 }
 
 type StreamState struct {
@@ -312,10 +313,24 @@ func main() {
 
 	flag.StringVar(&o.Names, "names", "fake0", "")
 	flag.BoolVar(&o.NoModules, "no-modules", false, "")
+	flag.IntVar(&o.PrimeReadings, "prime-readings", 0, "")
 	flag.Parse()
 
 	names := strings.Split(o.Names, ",")
 	devices := CreateFakeDevicesNamed(names, o.NoModules)
+
+	if o.PrimeReadings > 0 {
+		for _, device := range devices {
+			device.State.Streams[0].Open()
+			device.State.Streams[1].Open()
+
+			device.State.Streams[1].AppendConfiguration()
+
+			for i := 0; i < o.PrimeReadings; i += 1 {
+				device.State.Streams[0].AppendReading()
+			}
+		}
+	}
 
 	dispatcher := NewDispatcher()
 	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
