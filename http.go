@@ -13,6 +13,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
+	"github.com/efarrer/iothrottler"
+
 	pb "github.com/fieldkit/app-protocol"
 	pbatlas "github.com/fieldkit/atlas-protocol"
 )
@@ -71,6 +73,10 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	start := uint64(0)
 	end := stream.Record + 1
 
+	pool := iothrottler.NewIOThrottlerPool(iothrottler.BytesPerSecond * 50 * 1024)
+
+	defer pool.ReleasePool()
+
 	query := GetDownloadQuery(ctx, req)
 	if query != nil {
 		start = uint64(query.Ranges[0].Start)
@@ -106,6 +112,10 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	}
 
 	rw.WriteHeaders(200)
+
+	if err := rw.Throttle(pool); err != nil {
+		return nil
+	}
 
 	bytesWritten := 0
 	buffer := make([]byte, 1024)
@@ -387,6 +397,7 @@ type HttpReplyWriter struct {
 	headers     bool
 	size        int
 	res         http.ResponseWriter
+	writer      io.Writer
 }
 
 func (rw *HttpReplyWriter) WriteHeaders(statusCode int) error {
@@ -411,9 +422,12 @@ func (rw *HttpReplyWriter) WriteHeaders(statusCode int) error {
 	return nil
 }
 
+func (rw *HttpReplyWriter) Close() error {
+	return nil
+}
+
 func (rw *HttpReplyWriter) Prepare(size int) error {
 	rw.size = size
-
 	return nil
 }
 
@@ -441,6 +455,19 @@ func (rw *HttpReplyWriter) WriteStatusBytes(statusCode int, bytes []byte) (int, 
 	return rw.WriteBytes(bytes)
 }
 
+func (rw *HttpReplyWriter) Throttle(pool *iothrottler.IOThrottlerPool) error {
+	w, err := pool.AddWriter(rw)
+	if err != nil {
+		return err
+	}
+	rw.writer = w
+	return nil
+}
+
+func (rw *HttpReplyWriter) Write(bytes []byte) (int, error) {
+	return rw.res.Write(bytes)
+}
+
 func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
 	if !rw.headers {
 		if rw.hexEncoding {
@@ -452,11 +479,15 @@ func (rw *HttpReplyWriter) WriteBytes(bytes []byte) (int, error) {
 
 	rw.WriteHeaders(200)
 
+	if rw.writer == nil {
+		rw.writer = rw.res
+	}
+
 	if rw.hexEncoding {
-		writer := hex.NewEncoder(rw.res)
+		writer := hex.NewEncoder(rw.writer)
 		return writer.Write(bytes)
 	}
-	return rw.res.Write(bytes)
+	return rw.writer.Write(bytes)
 }
 
 func (rw *HttpReplyWriter) WriteError(message string) (int, error) {

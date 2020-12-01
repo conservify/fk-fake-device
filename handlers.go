@@ -418,11 +418,12 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 	}
 
 	return &pb.HttpReply{
-		Type:      pb.ReplyType_REPLY_READINGS,
-		Status:    status.Status,
-		Streams:   status.Streams,
-		Modules:   status.Modules,
-		Schedules: status.Schedules,
+		Type:            pb.ReplyType_REPLY_READINGS,
+		Status:          status.Status,
+		Streams:         status.Streams,
+		Modules:         status.Modules,
+		Schedules:       status.Schedules,
+		NetworkSettings: status.NetworkSettings,
 		LiveReadings: []*pb.LiveReadings{
 			&pb.LiveReadings{
 				Time:    uint64(now.Unix()),

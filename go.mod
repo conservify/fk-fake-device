@@ -8,6 +8,7 @@ require (
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
 	github.com/dimfeld/httptreemux v5.0.1+incompatible // indirect
 	github.com/drhodes/golorem v0.0.0-20160418191928-ecccc744c2d9 // indirect
+	github.com/efarrer/iothrottler v0.0.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/fieldkit/app-protocol v0.0.0-20200815000050-2e5ad3416568
 	github.com/fieldkit/atlas-protocol v0.0.0-20200619180615-31cb71ff99be // indirect
