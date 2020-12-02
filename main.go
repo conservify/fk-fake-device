@@ -30,6 +30,8 @@ func PublishAddressOverZeroConf(name string, deviceId string, port int) *zerocon
 		panic(err)
 	}
 
+	server.TTL(10)
+
 	log.Printf("Registered ZeroConf: %v %v %v", name, serviceType, deviceId)
 
 	return server
