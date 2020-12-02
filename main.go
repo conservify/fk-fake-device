@@ -189,14 +189,14 @@ type FakeDevice struct {
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
-	fd.ZeroConf = PublishAddressOverZeroConf(fd.Name, fd.DeviceId, fd.Port)
-
 	ws, err := NewHttpServer(fd, dispatcher)
 	if err != nil {
 		panic(err)
 	}
 
 	fd.WebServer = ws
+
+	fd.ZeroConf = PublishAddressOverZeroConf(fd.Name, fd.DeviceId, fd.Port)
 }
 
 func (fd *FakeDevice) Close() {
