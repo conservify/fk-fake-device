@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/drhodes/golorem"
@@ -467,7 +468,21 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 		device.State.Identity.Device = query.Identity.Name
 	}
 	if query.NetworkSettings != nil {
-		device.State.Networks = query.NetworkSettings.Networks
+		for i, newN := range query.NetworkSettings.Networks {
+			if i >= len(device.State.Networks) {
+				device.State.Networks = append(query.NetworkSettings.Networks, newN)
+				continue
+			}
+
+			oldN := device.State.Networks[i]
+			if strings.Compare(newN.Ssid, oldN.Ssid) == 0 {
+				if newN.Keeping {
+					continue
+				}
+			}
+
+			device.State.Networks[i] = newN
+		}
 	}
 	if query.LoraSettings != nil {
 		deviceEui := device.State.Lora.DeviceEui

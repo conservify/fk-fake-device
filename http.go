@@ -91,7 +91,7 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	log.Printf("(http) Downloading (%d -> %d) %d bytes", startPosition, endPosition, length)
 
 	w.Header().Add("Fk-Blocks", fmt.Sprintf("%d, %d", start, end))
-	w.Header().Add("Fk-Generation", fmt.Sprintf("%s", hex.EncodeToString(device.State.Identity.Generation)))
+	w.Header().Add("Fk-Generation", fmt.Sprintf("%s", hex.EncodeToString(device.State.Identity.GenerationId)))
 	w.Header().Add("Fk-DeviceId", fmt.Sprintf("%s", hex.EncodeToString(device.State.Identity.DeviceId)))
 
 	file, err := stream.OpenFile()
