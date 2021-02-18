@@ -11,49 +11,15 @@ import (
 
 	"github.com/drhodes/golorem"
 
-	"github.com/golang/protobuf/proto"
+	_ "github.com/golang/protobuf/proto"
 
 	pb "github.com/fieldkit/app-protocol"
-	pbatlas "github.com/fieldkit/atlas-protocol"
+	_ "github.com/fieldkit/data-protocol"
 )
 
-func generateAtlasStatus(device *FakeDevice, index int, delimitted bool) []byte {
+func generateWaterConfiguration(device *FakeDevice, index int, delimitted bool) []byte {
 	module := device.Modules[index]
-	value := module.Calibration
-
-	reply := &pbatlas.WireAtlasReply{
-		Type: pbatlas.ReplyType_REPLY_STATUS,
-		Calibration: &pbatlas.AtlasCalibrationStatus{
-			Type: module.SensorType,
-			Raw:  value,
-		},
-	}
-
-	switch module.SensorType {
-	case pbatlas.SensorType_SENSOR_PH:
-		reply.Calibration.Ph = pbatlas.PhCalibrations(value)
-	case pbatlas.SensorType_SENSOR_DO:
-		reply.Calibration.DissolvedOxygen = pbatlas.DoCalibrations(value)
-	case pbatlas.SensorType_SENSOR_TEMP:
-		reply.Calibration.Temp = pbatlas.TempCalibrations(value)
-	case pbatlas.SensorType_SENSOR_ORP:
-		reply.Calibration.Orp = pbatlas.OrpCalibrations(value)
-	case pbatlas.SensorType_SENSOR_EC:
-		reply.Calibration.Ec = pbatlas.EcCalibrations(value)
-	}
-
-	data, err := proto.Marshal(reply)
-	if err != nil {
-		panic(err)
-	}
-
-	if delimitted {
-		buf := proto.NewBuffer(make([]byte, 0))
-		buf.EncodeRawBytes(data)
-		return buf.Bytes()
-	}
-
-	return data
+	return module.Configuration
 }
 
 func generateModuleId(position int, device *FakeDevice, m *pb.ModuleCapabilities) *pb.ModuleCapabilities {
@@ -72,9 +38,9 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 	}
 	return []*pb.ModuleCapabilities{
 		generateModuleId(0, device, &pb.ModuleCapabilities{
-			Position: 0,
-			Name:     "modules.water.ph",
-			Status:   generateAtlasStatus(device, 0, false),
+			Position:      0,
+			Name:          "modules.water.ph",
+			Configuration: generateWaterConfiguration(device, 0, true),
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -85,9 +51,9 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			},
 		}),
 		generateModuleId(1, device, &pb.ModuleCapabilities{
-			Position: 1,
-			Name:     "modules.water.ec",
-			Status:   generateAtlasStatus(device, 1, false),
+			Position:      1,
+			Name:          "modules.water.ec",
+			Configuration: generateWaterConfiguration(device, 1, true),
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -98,9 +64,9 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			},
 		}),
 		generateModuleId(2, device, &pb.ModuleCapabilities{
-			Position: 2,
-			Name:     "modules.water.temp",
-			Status:   generateAtlasStatus(device, 2, false),
+			Position:      2,
+			Name:          "modules.water.temp",
+			Configuration: generateWaterConfiguration(device, 2, true),
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -111,9 +77,9 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			},
 		}),
 		generateModuleId(3, device, &pb.ModuleCapabilities{
-			Position: 3,
-			Name:     "modules.water.do",
-			Status:   generateAtlasStatus(device, 3, false),
+			Position:      3,
+			Name:          "modules.water.do",
+			Configuration: generateWaterConfiguration(device, 3, true),
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -124,9 +90,9 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			},
 		}),
 		generateModuleId(4, device, &pb.ModuleCapabilities{
-			Position: 4,
-			Name:     "modules.water.orp",
-			Status:   generateAtlasStatus(device, 4, false),
+			Position:      4,
+			Name:          "modules.water.orp",
+			Configuration: generateWaterConfiguration(device, 4, true),
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,

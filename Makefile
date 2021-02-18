@@ -22,6 +22,7 @@ build:
 rebuild:
 	go get github.com/fieldkit/app-protocol
 	go get github.com/fieldkit/data-protocol
+	go get github.com/fieldkit/atlas-protocol
 	GOOS=linux GOARCH=amd64 GOFLAGS=-a $(MAKE) binaries-all
 	GOOS=linux GOARCH=arm GOFLAGS=-a $(MAKE) binaries-all
 	GOOS=darwin GOARCH=amd64 GOFLAGS=-a $(MAKE) binaries-all

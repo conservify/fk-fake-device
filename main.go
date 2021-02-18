@@ -173,8 +173,8 @@ type HardwareState struct {
 }
 
 type FakeModule struct {
-	SensorType  pbatlas.SensorType
-	Calibration uint32
+	SensorType    pbatlas.SensorType
+	Configuration []byte
 }
 
 type FakeDevice struct {
@@ -287,24 +287,19 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 			},
 			Modules: []*FakeModule{
 				&FakeModule{
-					SensorType:  pbatlas.SensorType_SENSOR_PH,
-					Calibration: 0,
+					SensorType: pbatlas.SensorType_SENSOR_PH,
 				},
 				&FakeModule{
-					SensorType:  pbatlas.SensorType_SENSOR_EC,
-					Calibration: 0,
+					SensorType: pbatlas.SensorType_SENSOR_EC,
 				},
 				&FakeModule{
-					SensorType:  pbatlas.SensorType_SENSOR_TEMP,
-					Calibration: 0,
+					SensorType: pbatlas.SensorType_SENSOR_TEMP,
 				},
 				&FakeModule{
-					SensorType:  pbatlas.SensorType_SENSOR_DO,
-					Calibration: 0,
+					SensorType: pbatlas.SensorType_SENSOR_DO,
 				},
 				&FakeModule{
-					SensorType:  pbatlas.SensorType_SENSOR_ORP,
-					Calibration: 0,
+					SensorType: pbatlas.SensorType_SENSOR_ORP,
 				},
 			},
 		}

@@ -202,77 +202,37 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 			return nil, err
 		}
 
-		log.Printf("(http) Atlas Query: %v", wireQuery)
+		log.Printf("(http) water-query: %v", wireQuery)
 
 		if wireQuery.Calibration != nil {
 			switch wireQuery.Calibration.Operation {
 			case pbatlas.CalibrationOperation_CALIBRATION_CLEAR:
-				device.Modules[position].Calibration = 0
-				log.Printf("(http) atlas-operation: CLEAR")
+				log.Printf("(http) water-operation: CLEAR")
+				device.Modules[position].Configuration = nil
 			case pbatlas.CalibrationOperation_CALIBRATION_SET:
-				which := wireQuery.Calibration.Which
-				value := wireQuery.Calibration.Value
-				previous := device.Modules[position].Calibration
-				switch device.Modules[position].SensorType {
-				case pbatlas.SensorType_SENSOR_PH:
-					switch pbatlas.PhCalibrateCommand(which) {
-					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_LOW:
-						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_LOW)
-					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_MIDDLE:
-						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_MIDDLE)
-					case pbatlas.PhCalibrateCommand_CALIBRATE_PH_HIGH:
-						device.Modules[position].Calibration |= uint32(pbatlas.PhCalibrations_PH_HIGH)
-					default:
-						log.Printf("(http) unknown calibration")
-					}
-				case pbatlas.SensorType_SENSOR_ORP:
-					switch pbatlas.OrpCalibrateCommand(which) {
-					case pbatlas.OrpCalibrateCommand_CALIBRATE_ORP_SINGLE:
-						device.Modules[position].Calibration |= uint32(pbatlas.OrpCalibrations_ORP_SINGLE)
-					default:
-						log.Printf("(http) unknown calibration")
-					}
-				case pbatlas.SensorType_SENSOR_DO:
-					switch pbatlas.DoCalibrateCommand(which) {
-					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ATMOSPHERE:
-						device.Modules[position].Calibration |= uint32(pbatlas.DoCalibrations_DO_ATMOSPHERE)
-					case pbatlas.DoCalibrateCommand_CALIBRATE_DO_ZERO:
-						device.Modules[position].Calibration |= uint32(pbatlas.DoCalibrations_DO_ZERO)
-					default:
-						log.Printf("(http) unknown calibration")
-					}
-				case pbatlas.SensorType_SENSOR_TEMP:
-					switch pbatlas.TempCalibrateCommand(which) {
-					case pbatlas.TempCalibrateCommand_CALIBRATE_TEMP_SINGLE:
-						device.Modules[position].Calibration |= uint32(pbatlas.TempCalibrations_TEMP_SINGLE)
-					default:
-						log.Printf("(http) unknown calibration")
-					}
-				case pbatlas.SensorType_SENSOR_EC:
-					switch pbatlas.EcCalibrateCommand(which) {
-					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DRY:
-						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DRY)
-					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_SINGLE:
-						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_SINGLE)
-					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_LOW:
-						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DUAL_LOW)
-					case pbatlas.EcCalibrateCommand_CALIBRATE_EC_DUAL_HIGH:
-						device.Modules[position].Calibration |= uint32(pbatlas.EcCalibrations_EC_DUAL_HIGH)
-					default:
-						log.Printf("(http) unknown calibration")
-					}
-				default:
-					log.Printf("(http) unknown sensor")
-				}
-				log.Printf("(http) atlas-operation: SET %v %v (%v -> %v)", which, value, previous, device.Modules[position].Calibration)
+				log.Printf("(http) water-operation: SET %v", wireQuery.Calibration.Configuration)
+				device.Modules[position].Configuration = wireQuery.Calibration.Configuration
 			}
 		}
 
-		reply := generateAtlasStatus(device, position, true)
+		configuration := generateWaterConfiguration(device, position, true)
 
-		_, err = rw.WriteBytes(reply)
+		reply := &pbatlas.WireAtlasReply{}
+		reply.Type = pbatlas.ReplyType_REPLY_STATUS
+		reply.Calibration = &pbatlas.AtlasCalibrationStatus{
+			Configuration: configuration,
+		}
 
-		log.Printf("(http) Atlas Reply: %v", len(reply))
+		data, err := proto.Marshal(reply)
+		if err != nil {
+			panic(err)
+		}
+		buf = proto.NewBuffer(make([]byte, 0))
+		buf.EncodeRawBytes(data)
+
+		_, err = rw.WriteBytes(buf.Bytes())
+
+		log.Printf("(http) water-reply: %v", len(configuration))
 
 		return nil, io.EOF
 	})
