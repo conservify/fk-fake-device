@@ -353,8 +353,9 @@ func makeWaterReadings(status *pb.HttpReply, moduleIndex int) *pb.LiveModuleRead
 		Module: status.Modules[moduleIndex],
 		Readings: []*pb.LiveSensorReading{
 			&pb.LiveSensorReading{
-				Sensor: status.Modules[moduleIndex].Sensors[0],
-				Value:  value,
+				Sensor:       status.Modules[moduleIndex].Sensors[0],
+				Value:        value,
+				Uncalibrated: value,
 			},
 		},
 	}
