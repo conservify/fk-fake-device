@@ -277,6 +277,10 @@ func NewHttpServer(device *FakeDevice, dispatcher *Dispatcher) (*HttpServer, err
 		ctx := context.Background()
 		HandleModule(ctx, w, req, device, 3)
 	})
+	server.HandleFunc("/fk/v1/modules/4", func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.Background()
+		HandleModule(ctx, w, req, device, 4)
+	})
 	server.HandleFunc("/fk/v1/upload/firmware", func(w http.ResponseWriter, req *http.Request) {
 		ctx := context.Background()
 		HandleFirmware(ctx, w, req, device)
