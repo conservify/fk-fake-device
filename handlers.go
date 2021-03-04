@@ -37,6 +37,19 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 		return make([]*pb.ModuleCapabilities, 0)
 	}
 	return []*pb.ModuleCapabilities{
+		generateModuleId(2, device, &pb.ModuleCapabilities{
+			Position:      2,
+			Name:          "modules.water.temp",
+			Configuration: generateWaterConfiguration(device, 2, true),
+			Sensors: []*pb.SensorCapabilities{
+				&pb.SensorCapabilities{
+					Number:        0,
+					Name:          "temp",
+					UnitOfMeasure: "C",
+					Frequency:     60,
+				},
+			},
+		}),
 		generateModuleId(0, device, &pb.ModuleCapabilities{
 			Position:      0,
 			Name:          "modules.water.ph",
@@ -59,19 +72,6 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 					Number:        0,
 					Name:          "ec",
 					UnitOfMeasure: "µS/cm",
-					Frequency:     60,
-				},
-			},
-		}),
-		generateModuleId(2, device, &pb.ModuleCapabilities{
-			Position:      2,
-			Name:          "modules.water.temp",
-			Configuration: generateWaterConfiguration(device, 2, true),
-			Sensors: []*pb.SensorCapabilities{
-				&pb.SensorCapabilities{
-					Number:        0,
-					Name:          "temp",
-					UnitOfMeasure: "C",
 					Frequency:     60,
 				},
 			},
@@ -375,9 +375,9 @@ func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {
 
 	if len(device.Modules) > 0 {
 		liveReadings = []*pb.LiveModuleReadings{
+			makeWaterReadings(status, 2), // temp
 			makeWaterReadings(status, 0), // ph
 			makeWaterReadings(status, 1), // ec
-			makeWaterReadings(status, 2), // temp
 			makeWaterReadings(status, 3), // do
 			makeWaterReadings(status, 4), // orp
 			makeDiagnosticsReadings(status),
