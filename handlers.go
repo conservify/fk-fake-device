@@ -220,11 +220,10 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 			},
 			Logs: lorem.Paragraph(10, 10),
 			Firmware: &pb.Firmware{
-				Build:     "build",
 				Timestamp: uint64(now.Unix()),
-				Version:   "version",
 				Hash:      "hash",
 				Number:    "590",
+				Version:   "1.0.0-main.0-abcdef",
 			},
 		},
 		LoraSettings: device.State.Lora,
@@ -355,7 +354,7 @@ func makeWaterReadings(status *pb.HttpReply, moduleIndex int) *pb.LiveModuleRead
 			&pb.LiveSensorReading{
 				Sensor:       status.Modules[moduleIndex].Sensors[0],
 				Value:        value,
-				Uncalibrated: value,
+				Uncalibrated: value * 2,
 			},
 		},
 	}
