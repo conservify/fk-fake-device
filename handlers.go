@@ -218,13 +218,8 @@ func makeStatusReply(device *FakeDevice) *pb.HttpReply {
 					Voltage: 0020.0,
 				},
 			},
-			Logs: lorem.Paragraph(10, 10),
-			Firmware: &pb.Firmware{
-				Timestamp: uint64(now.Unix()),
-				Hash:      "hash",
-				Number:    "590",
-				Version:   "1.0.0-main.0-abcdef",
-			},
+			Logs:     lorem.Paragraph(10, 10),
+			Firmware: device.Firmware,
 		},
 		LoraSettings: device.State.Lora,
 		NetworkSettings: &pb.NetworkSettings{

@@ -188,6 +188,7 @@ type FakeDevice struct {
 	Longitude        float32
 	Modules          []*FakeModule
 	ReadingsSchedule *pb.Schedule
+	Firmware         *pb.Firmware
 }
 
 func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
@@ -267,6 +268,8 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 			},
 		}
 
+		now := time.Now().UTC()
+
 		devices[i] = &FakeDevice{
 			Name:     name,
 			DeviceId: hex.EncodeToString(deviceID),
@@ -281,6 +284,12 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 						Interval: 60,
 					},
 				},
+			},
+			Firmware: &pb.Firmware{
+				Timestamp: uint64(now.Unix()),
+				Hash:      "hash",
+				Number:    "590",
+				Version:   "1.0.0-main.0-abcdef",
 			},
 			Modules: []*FakeModule{
 				&FakeModule{
