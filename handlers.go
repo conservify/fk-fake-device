@@ -429,9 +429,17 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 		device.State.Identity.Device = query.Identity.Name
 	}
 	if query.NetworkSettings != nil {
+		fmt.Printf("networks: %v\n", device.State.Networks)
+
+		maxIndex := 0
+
 		for i, newN := range query.NetworkSettings.Networks {
+			maxIndex = i
+
+			fmt.Printf("network[%d]: %s\n", i, newN)
+
 			if i >= len(device.State.Networks) {
-				device.State.Networks = append(query.NetworkSettings.Networks, newN)
+				device.State.Networks = append(device.State.Networks, newN)
 				continue
 			}
 
@@ -444,6 +452,16 @@ func handleConfigure(ctx context.Context, device *FakeDevice, query *pb.HttpQuer
 
 			device.State.Networks[i] = newN
 		}
+
+		if len(query.NetworkSettings.Networks) == 0 {
+			device.State.Networks = make([]*pb.NetworkInfo, 0)
+		} else {
+			if maxIndex > 0 {
+				device.State.Networks = device.State.Networks[:maxIndex]
+			}
+		}
+
+		fmt.Printf("networks: %v %v\n", device.State.Networks, maxIndex)
 	}
 	if query.LoraSettings != nil {
 		deviceEui := device.State.Lora.DeviceEui
