@@ -415,8 +415,10 @@ func handleQueryReadings(ctx context.Context, device *FakeDevice, query *pb.Http
 
 func handleQueryTakeReadings(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
 	if query.Locate != nil {
-		device.Latitude = query.Locate.Latitude
-		device.Longitude = query.Locate.Longitude
+		if !device.HaveLocation {
+			device.Latitude = query.Locate.Latitude
+			device.Longitude = query.Locate.Longitude
+		}
 	}
 
 	reply := makeLiveReadingsReply(device)

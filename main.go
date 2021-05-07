@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
@@ -41,6 +42,8 @@ type Options struct {
 	Names         string
 	NoModules     bool
 	PrimeReadings int
+	Latitude      float64
+	Longitude     float64
 }
 
 type StreamState struct {
@@ -186,6 +189,7 @@ type FakeDevice struct {
 	State            *HardwareState
 	Latitude         float32
 	Longitude        float32
+	HaveLocation     bool
 	Modules          []*FakeModule
 	ReadingsSchedule *pb.Schedule
 	Firmware         *pb.Firmware
@@ -221,7 +225,7 @@ func (fd *FakeDevice) FakeReadings() {
 	}
 }
 
-func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
+func CreateFakeDevicesNamed(names []string, noModules bool, latitude, longitude float32) []*FakeDevice {
 	devices := make([]*FakeDevice, len(names))
 	for i, name := range names {
 		deviceIdHasher := sha1.New()
@@ -270,6 +274,11 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 
 		now := time.Now().UTC()
 
+		stationLatitude := latitude + (rand.Float32() * 2.00) - 1.0
+		stationLongitude := longitude + (rand.Float32() * 2.00) - 1.0
+
+		log.Printf("Location: %v %v", stationLatitude, stationLongitude)
+
 		devices[i] = &FakeDevice{
 			Name:     name,
 			DeviceId: hex.EncodeToString(deviceID),
@@ -285,6 +294,9 @@ func CreateFakeDevicesNamed(names []string, noModules bool) []*FakeDevice {
 					},
 				},
 			},
+			Latitude:     stationLatitude,
+			Longitude:    stationLongitude,
+			HaveLocation: true,
 			Firmware: &pb.Firmware{
 				Timestamp: uint64(now.Unix()),
 				Hash:      "hash",
@@ -323,10 +335,12 @@ func main() {
 	flag.StringVar(&o.Names, "names", "fake0", "")
 	flag.BoolVar(&o.NoModules, "no-modules", false, "")
 	flag.IntVar(&o.PrimeReadings, "prime-readings", 0, "")
+	flag.Float64Var(&o.Latitude, "latitude", 0, "")
+	flag.Float64Var(&o.Longitude, "longitude", 0, "")
 	flag.Parse()
 
 	names := strings.Split(o.Names, ",")
-	devices := CreateFakeDevicesNamed(names, o.NoModules)
+	devices := CreateFakeDevicesNamed(names, o.NoModules, float32(o.Latitude), float32(o.Longitude))
 
 	if o.PrimeReadings > 0 {
 		for _, device := range devices {
