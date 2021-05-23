@@ -280,7 +280,7 @@ func handleQueryScanNetworks(ctx context.Context, device *FakeDevice, query *pb.
 }
 
 func handleQueryStatus(ctx context.Context, device *FakeDevice, query *pb.HttpQuery, rw ReplyWriter) (err error) {
-	if query.Locate != nil {
+	if query != nil && query.Locate != nil {
 		device.Latitude = query.Locate.Latitude
 		device.Longitude = query.Locate.Longitude
 	}

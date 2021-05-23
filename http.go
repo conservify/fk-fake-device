@@ -308,6 +308,9 @@ func (hs *HttpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	log.Printf("(http) Request: %v %v", req.RemoteAddr, req.Method)
 
 	contentType := req.Header.Get("Content-Type")
+	contentLength := req.Header.Get("Content-Length")
+
+	log.Printf("(http) Content: %v %v", contentType, contentLength)
 
 	var reader io.Reader = req.Body
 
@@ -317,12 +320,12 @@ func (hs *HttpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		reader = hex.NewDecoder(req.Body)
 	}
 
-	_, _, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
-		rw := &HttpReplyWriter{
-			hexEncoding: hexEncoding,
-			res:         res,
-		}
+	rw := &HttpReplyWriter{
+		hexEncoding: hexEncoding,
+		res:         res,
+	}
 
+	_, i, err := ReadLengthPrefixedCollection(ctx, MaximumDataRecordLength, reader, func(bytes []byte) (m proto.Message, err error) {
 		buf := proto.NewBuffer(bytes)
 		wireQuery := &pb.HttpQuery{}
 		err = buf.Unmarshal(wireQuery)
@@ -350,6 +353,20 @@ func (hs *HttpServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	})
 	if err != nil {
 		panic(err)
+	}
+
+	if i == 0 {
+		handler := hs.dispatcher.handlers[pb.QueryType_QUERY_STATUS]
+		if handler == nil {
+			panic("pb.QueryType_QUERY_STATUS")
+		}
+
+		err = handler(ctx, hs.device, nil, rw)
+		if err != nil {
+			rw.WriteError("Error handling message.")
+			log.Printf("Error handling RPC %v", err.Error())
+			return
+		}
 	}
 }
 
