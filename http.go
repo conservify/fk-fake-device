@@ -48,22 +48,38 @@ func GetDownloadQuery(ctx context.Context, req *http.Request) *pb.DownloadQuery 
 		panic(err)
 	}
 
+	start := 0
+	end := 0
+
 	if len(queries) == 0 {
-		startStr := req.URL.Query()["first"]
-		if len(startStr) == 1 {
-			start, err := strconv.Atoi(startStr[0])
+		firstStr := req.URL.Query()["first"]
+		if len(firstStr) == 1 {
+			first, err := strconv.Atoi(firstStr[0])
 			if err != nil {
 				panic(err)
 			}
-			return &pb.DownloadQuery{
-				Ranges: []*pb.Range{
-					&pb.Range{
-						Start: uint32(start),
-					},
-				},
-			}
+
+			start = first
 		}
-		return nil
+
+		lastStr := req.URL.Query()["last"]
+		if len(lastStr) == 1 {
+			last, err := strconv.Atoi(lastStr[0])
+			if err != nil {
+				panic(err)
+			}
+
+			end = last
+		}
+
+		return &pb.DownloadQuery{
+			Ranges: []*pb.Range{
+				&pb.Range{
+					Start: uint32(start),
+					End:   uint32(end),
+				},
+			},
+		}
 	}
 
 	return queries[0].(*pb.DownloadQuery)
@@ -80,6 +96,7 @@ func HandleDownload(ctx context.Context, w http.ResponseWriter, req *http.Reques
 	query := GetDownloadQuery(ctx, req)
 	if query != nil {
 		start = uint64(query.Ranges[0].Start)
+		end = uint64(query.Ranges[0].End)
 	}
 
 	startPosition := stream.PositionOf(start)
