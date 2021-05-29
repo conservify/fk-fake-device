@@ -76,6 +76,8 @@ github.com/fieldkit/app-protocol v0.0.0-20201202001608-60535e07cf08 h1:9Q/klRHvx
 github.com/fieldkit/app-protocol v0.0.0-20201202001608-60535e07cf08/go.mod h1:gwbx2t3FRLipEU8NgPYE0A1GsKvRoAjlzzaV29JGHxM=
 github.com/fieldkit/app-protocol v0.0.0-20210217044227-f2bf93baa324 h1:VepmrTtG3hCqX+XL3ecdoJcpP4Tef6RmEI+kTk4L0sQ=
 github.com/fieldkit/app-protocol v0.0.0-20210217044227-f2bf93baa324/go.mod h1:gwbx2t3FRLipEU8NgPYE0A1GsKvRoAjlzzaV29JGHxM=
+github.com/fieldkit/app-protocol v0.0.0-20210528230858-7bfa7ff71fc5 h1:myxqNIzLZFR/Ag/B+xKf8tuRqlOA9cT91oBR84+fuTc=
+github.com/fieldkit/app-protocol v0.0.0-20210528230858-7bfa7ff71fc5/go.mod h1:QVcnK7kSKAzcX2U6kYouPuunH7lQY75uStj1VxCWwSw=
 github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb h1:svCrGeRt5EEs8M6pwWjZ2xPzXcxtHEOb+DEAKwte0Ug=
 github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
 github.com/fieldkit/atlas-protocol v0.0.0-20200619180615-31cb71ff99be h1:uXGnalkw9UdJwEHXreH7VzyAvoDQjrIBPPMyBpvTdYU=
@@ -103,6 +105,8 @@ github.com/fieldkit/data-protocol v0.0.0-20200619180538-c9996b976b05 h1:pPR3zXSE
 github.com/fieldkit/data-protocol v0.0.0-20200619180538-c9996b976b05/go.mod h1:/5cSfo9D8do5ubIYR2+BuiHgQSkti13i/pAFNLNGQqw=
 github.com/fieldkit/data-protocol v0.0.0-20210217044607-d122a172b41f h1:5mKk5rXY0vSI3NGcdAxctqs8DPHO0lVYwxZpGmVSmZE=
 github.com/fieldkit/data-protocol v0.0.0-20210217044607-d122a172b41f/go.mod h1:p0vAxxalVDswIb4sgtKSAIHTHxXvQ9TIlnnqKcLrOSI=
+github.com/fieldkit/data-protocol v0.0.0-20210322164336-136b961afd9d h1:TTKqmnGZbI8tV1l/XgD6K7ieKqZZcH79CwcrCi7y5Hs=
+github.com/fieldkit/data-protocol v0.0.0-20210322164336-136b961afd9d/go.mod h1:skBWKfhT6McALxPs7TdtR8MStqd2Yb1WZz2/fMIDjUw=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
@@ -129,11 +133,17 @@ github.com/golang/protobuf v1.4.2 h1:+Z5KGCizgyZCbGh1KZqA0fcLLkwbsjIzS4aV2v7wJX0
 github.com/golang/protobuf v1.4.2/go.mod h1:oDoupMAO8OvCJWAcko0GGGIgR6R6ocIYbsSw735rRwI=
 github.com/golang/protobuf v1.4.3 h1:JjCZWpVbqXDqFVmTfYWEVTMIYrL/NPdPSCHPJ0T/raM=
 github.com/golang/protobuf v1.4.3/go.mod h1:oDoupMAO8OvCJWAcko0GGGIgR6R6ocIYbsSw735rRwI=
+github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
+github.com/golang/protobuf v1.5.1 h1:jAbXjIeW2ZSW2AwFxlGTDoc2CjI2XujLkV3ArsZFCvc=
+github.com/golang/protobuf v1.5.1/go.mod h1:DopwsBzvsk0Fs44TXzsVbJyPhcCPeIwnvohx4u74HPM=
+github.com/golang/protobuf v1.5.2 h1:ROPKBNFfQgOUMifHyP+KYbvpjbdoFNs+aK7DXlji0Tw=
+github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
 github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c h1:svzQzfVE9t7Y1CGULS5PsMWs4/H4Au/ZTJzU/0CKgqc=
 github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c/go.mod h1:YjKB0WsLXlMkO9p+wGTCoPIDGRJH0mz7E526PxkQVxI=
@@ -276,6 +286,9 @@ google.golang.org/protobuf v1.24.0 h1:UhZDfRO8JRQru4/+LlLE0BRKGF8L+PICnvYZmx/fEG
 google.golang.org/protobuf v1.24.0/go.mod h1:r/3tXBNzIEhYS9I1OUVjXDlt8tc493IdKGjtUeSXeh4=
 google.golang.org/protobuf v1.25.0 h1:Ejskq+SyPohKW+1uil0JJMtmHCgJPJ/qWTxr8qp+R4c=
 google.golang.org/protobuf v1.25.0/go.mod h1:9JNX74DMeImyA3h4bdi1ymwjUzf21/xIlbajtzgsN7c=
+google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
+google.golang.org/protobuf v1.26.0 h1:bxAC2xTBsZGibn2RTntX0oH50xLsqy1OxA9tTL3p/lk=
+google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

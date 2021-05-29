@@ -16,7 +16,6 @@ import (
 	"github.com/efarrer/iothrottler"
 
 	pb "github.com/fieldkit/app-protocol"
-	pbatlas "github.com/fieldkit/atlas-protocol"
 )
 
 type HttpServer struct {
@@ -213,32 +212,17 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 		}
 
 		buf := proto.NewBuffer(bytes)
-		wireQuery := &pbatlas.WireAtlasQuery{}
+		wireQuery := &pb.ModuleHttpQuery{}
 		err = buf.Unmarshal(wireQuery)
 		if err != nil {
 			return nil, err
 		}
 
-		log.Printf("(http) water-query: %v", wireQuery)
+		log.Printf("(http) module-query: %v", wireQuery)
 
-		if wireQuery.Calibration != nil {
-			switch wireQuery.Calibration.Operation {
-			case pbatlas.CalibrationOperation_CALIBRATION_CLEAR:
-				log.Printf("(http) water-operation: CLEAR")
-				device.Modules[position].Configuration = nil
-			case pbatlas.CalibrationOperation_CALIBRATION_SET:
-				log.Printf("(http) water-operation: SET %v", wireQuery.Calibration.Configuration)
-				device.Modules[position].Configuration = wireQuery.Calibration.Configuration
-			}
-		}
-
-		configuration := generateWaterConfiguration(device, position, true)
-
-		reply := &pbatlas.WireAtlasReply{}
-		reply.Type = pbatlas.ReplyType_REPLY_STATUS
-		reply.Calibration = &pbatlas.AtlasCalibrationStatus{
-			Configuration: configuration,
-		}
+		reply := &pb.ModuleHttpReply{}
+		reply.Type = pb.ModuleReplyType_MODULE_REPLY_SUCCESS
+		reply.Configuration = wireQuery.Configuration
 
 		data, err := proto.Marshal(reply)
 		if err != nil {
@@ -249,7 +233,7 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 
 		_, err = rw.WriteBytes(buf.Bytes())
 
-		log.Printf("(http) water-reply: %v", len(configuration))
+		log.Printf("(http) module-reply: %v", len(reply.Configuration))
 
 		return nil, io.EOF
 	})
