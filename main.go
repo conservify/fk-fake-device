@@ -176,6 +176,7 @@ type HardwareState struct {
 }
 
 type FakeModule struct {
+	Position      int
 	SensorType    pbatlas.SensorType
 	Configuration []byte
 }
@@ -305,18 +306,23 @@ func CreateFakeDevicesNamed(names []string, noModules bool, latitude, longitude 
 			},
 			Modules: []*FakeModule{
 				&FakeModule{
+					Position:   0,
 					SensorType: pbatlas.SensorType_SENSOR_PH,
 				},
 				&FakeModule{
+					Position:   1,
 					SensorType: pbatlas.SensorType_SENSOR_EC,
 				},
 				&FakeModule{
+					Position:   2,
 					SensorType: pbatlas.SensorType_SENSOR_TEMP,
 				},
 				&FakeModule{
+					Position:   3,
 					SensorType: pbatlas.SensorType_SENSOR_DO,
 				},
 				&FakeModule{
+					Position:   4,
 					SensorType: pbatlas.SensorType_SENSOR_ORP,
 				},
 			},

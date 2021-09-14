@@ -218,7 +218,7 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 			return nil, err
 		}
 
-		log.Printf("(http) module-query: %v", wireQuery)
+		log.Printf("(http) module-query[%d]: %v", position, wireQuery)
 
 		reply := &pb.ModuleHttpReply{}
 		reply.Type = pb.ModuleReplyType_MODULE_REPLY_SUCCESS
@@ -233,7 +233,13 @@ func HandleModule(ctx context.Context, res http.ResponseWriter, req *http.Reques
 
 		_, err = rw.WriteBytes(buf.Bytes())
 
-		log.Printf("(http) module-reply: %v", len(reply.Configuration))
+		log.Printf("(http) module-reply[%d]: %v", position, len(reply.Configuration))
+
+		for _, m := range device.Modules {
+			if m.Position == position {
+				m.Configuration = reply.Configuration
+			}
+		}
 
 		return nil, io.EOF
 	})
