@@ -78,12 +78,18 @@ github.com/fieldkit/app-protocol v0.0.0-20210217044227-f2bf93baa324 h1:VepmrTtG3
 github.com/fieldkit/app-protocol v0.0.0-20210217044227-f2bf93baa324/go.mod h1:gwbx2t3FRLipEU8NgPYE0A1GsKvRoAjlzzaV29JGHxM=
 github.com/fieldkit/app-protocol v0.0.0-20210528230858-7bfa7ff71fc5 h1:myxqNIzLZFR/Ag/B+xKf8tuRqlOA9cT91oBR84+fuTc=
 github.com/fieldkit/app-protocol v0.0.0-20210528230858-7bfa7ff71fc5/go.mod h1:QVcnK7kSKAzcX2U6kYouPuunH7lQY75uStj1VxCWwSw=
+github.com/fieldkit/app-protocol v0.0.0-20210826221216-a3faf7354c98 h1:9la97pUVtjhok0WmVGdodEYnfcUkriU/N4fcp02pkaE=
+github.com/fieldkit/app-protocol v0.0.0-20210826221216-a3faf7354c98/go.mod h1:Movb3BuVIwjFvjDMJqC84qti3WTOd9zVF7Fa/5wGdMI=
+github.com/fieldkit/app-protocol v0.0.0-20210914181453-3c7ec93cd68e h1:ldWUBzEOo2sDI8nfCjm1QkB9X7KMcwyWR5MccIHuqqs=
+github.com/fieldkit/app-protocol v0.0.0-20210914181453-3c7ec93cd68e/go.mod h1:Movb3BuVIwjFvjDMJqC84qti3WTOd9zVF7Fa/5wGdMI=
 github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb h1:svCrGeRt5EEs8M6pwWjZ2xPzXcxtHEOb+DEAKwte0Ug=
 github.com/fieldkit/atlas-protocol v0.0.0-20190223200237-93438b343cbb/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
 github.com/fieldkit/atlas-protocol v0.0.0-20200619180615-31cb71ff99be h1:uXGnalkw9UdJwEHXreH7VzyAvoDQjrIBPPMyBpvTdYU=
 github.com/fieldkit/atlas-protocol v0.0.0-20200619180615-31cb71ff99be/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
 github.com/fieldkit/atlas-protocol v0.0.0-20210217044656-0bb63f5fd2c4 h1:bFFrGfRSskPbeEIbCa0mGLW1joe7S5nz7wGKNTn9weo=
 github.com/fieldkit/atlas-protocol v0.0.0-20210217044656-0bb63f5fd2c4/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
+github.com/fieldkit/atlas-protocol v0.0.0-20210322164304-44588194bf0d h1:5gff448uujmGBlILpU8f/LLrr6Y9hvyzc11bDCGamKk=
+github.com/fieldkit/atlas-protocol v0.0.0-20210322164304-44588194bf0d/go.mod h1:Q/2y8dvxA64Ni4AHv96Tqn/qwtZZXU2LBXuJ9ZlqCxs=
 github.com/fieldkit/cloud v0.0.0-20190529183849-5426fab875ec/go.mod h1:3t/uXpAzdatC0wZ+NbO7cu5VhheO3l43o9egSygavw8=
 github.com/fieldkit/cloud v0.0.0-20190917195237-6e5ed63a57b3/go.mod h1:3t/uXpAzdatC0wZ+NbO7cu5VhheO3l43o9egSygavw8=
 github.com/fieldkit/cloud v0.0.0-20190919194814-025e05412027/go.mod h1:3t/uXpAzdatC0wZ+NbO7cu5VhheO3l43o9egSygavw8=
@@ -289,6 +295,8 @@ google.golang.org/protobuf v1.25.0/go.mod h1:9JNX74DMeImyA3h4bdi1ymwjUzf21/xIlba
 google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp09yW+WbY/TyQbw=
 google.golang.org/protobuf v1.26.0 h1:bxAC2xTBsZGibn2RTntX0oH50xLsqy1OxA9tTL3p/lk=
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
+google.golang.org/protobuf v1.27.1 h1:SnqbnDw1V7RiZcXPx5MEeqPv2s79L9i7BJUlG/+RurQ=
+google.golang.org/protobuf v1.27.1/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

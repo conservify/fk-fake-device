@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/drhodes/golorem"
+	lorem "github.com/drhodes/golorem"
 
 	_ "github.com/golang/protobuf/proto"
 
@@ -341,18 +341,41 @@ func makeRandomReadings(status *pb.HttpReply) *pb.LiveModuleReadings {
 	}
 }
 
-func makeWaterReadings(status *pb.HttpReply, moduleIndex int) *pb.LiveModuleReadings {
-	value := float32(7.0) + (rand.Float32()*2 - 1)
-	return &pb.LiveModuleReadings{
-		Module: status.Modules[moduleIndex],
-		Readings: []*pb.LiveSensorReading{
-			&pb.LiveSensorReading{
-				Sensor:       status.Modules[moduleIndex].Sensors[0],
-				Value:        value,
-				Uncalibrated: value * 2,
-			},
-		},
+func makeWaterReadings(status *pb.HttpReply, position int) *pb.LiveModuleReadings {
+	for _, m := range status.Modules {
+		if m.Position == uint32(position) {
+			voltage := rand.Float32()
+			value := voltage
+			switch position {
+			case 0:
+				value = float32(7.0) + (voltage*2 - 1)
+				break
+			case 1:
+				value = voltage * 10000
+				break
+			case 2:
+				value = voltage * 30
+				break
+			case 3:
+				value = voltage * 10
+				break
+			}
+			// fmt.Printf("value[%d] %s voltage=%f value=%f\n", position, m.Name, voltage, value)
+			factory := value * 2
+			return &pb.LiveModuleReadings{
+				Module: m,
+				Readings: []*pb.LiveSensorReading{
+					&pb.LiveSensorReading{
+						Sensor:       m.Sensors[0],
+						Uncalibrated: voltage,
+						Value:        value,
+						Factory:      factory,
+					},
+				},
+			}
+		}
 	}
+	panic("no module at that position")
 }
 
 func makeLiveReadingsReply(device *FakeDevice) *pb.HttpReply {

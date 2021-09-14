@@ -10,8 +10,8 @@ require (
 	github.com/drhodes/golorem v0.0.0-20160418191928-ecccc744c2d9 // indirect
 	github.com/efarrer/iothrottler v0.0.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/fieldkit/app-protocol v0.0.0-20210528230858-7bfa7ff71fc5
-	github.com/fieldkit/atlas-protocol v0.0.0-20210217044656-0bb63f5fd2c4 // indirect
+	github.com/fieldkit/app-protocol v0.0.0-20210914181453-3c7ec93cd68e
+	github.com/fieldkit/atlas-protocol v0.0.0-20210322164304-44588194bf0d // indirect
 	github.com/fieldkit/cloud v0.0.0-20190919194814-025e05412027 // indirect
 	github.com/fieldkit/data-protocol v0.0.0-20210322164336-136b961afd9d
 	github.com/goadesign/goa v2.0.5+incompatible // indirect
