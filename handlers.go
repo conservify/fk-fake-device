@@ -78,12 +78,12 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 		}),
 		generateModuleId(3, device, &pb.ModuleCapabilities{
 			Position:      3,
-			Name:          "modules.water.dox",
+			Name:          "modules.water.do",
 			Configuration: generateWaterConfiguration(device, 3, true),
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
-					Name:          "dox",
+					Name:          "do",
 					UnitOfMeasure: "mg/L",
 					Frequency:     60,
 				},
