@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"net"
 	"os"
 	"os/signal"
 	"strings"
@@ -185,6 +186,7 @@ type FakeDevice struct {
 	Name             string
 	DeviceId         string
 	Port             int
+	UdpPort          int
 	ZeroConf         *zeroconf.Server
 	WebServer        *HttpServer
 	State            *HardwareState
@@ -205,6 +207,8 @@ func (fd *FakeDevice) Start(dispatcher *Dispatcher) {
 	fd.WebServer = ws
 
 	fd.ZeroConf = PublishAddressOverZeroConf(fd.Name, fd.DeviceId, fd.Port)
+
+	go PublishDnsDiscovery(fmt.Sprintf("224.1.2.3:%d", fd.UdpPort), fd.DeviceId)
 }
 
 func (fd *FakeDevice) Close() {
@@ -284,6 +288,7 @@ func CreateFakeDevicesNamed(names []string, noModules bool, latitude, longitude 
 			Name:     name,
 			DeviceId: hex.EncodeToString(deviceID),
 			Port:     2380 + i,
+			UdpPort:  22143 + i,
 			State:    &state,
 			ReadingsSchedule: &pb.Schedule{
 				Interval: 60,
@@ -333,6 +338,44 @@ func CreateFakeDevicesNamed(names []string, noModules bool, latitude, longitude 
 		}
 	}
 	return devices
+}
+
+func PublishDnsDiscovery(address string, deviceId string) (*net.UDPConn, error) {
+	addr, err := net.ResolveUDPAddr("udp4", address)
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := net.DialUDP("udp4", nil, addr)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Publishing UDP on %v for %v", address, deviceId)
+	bytes, err := hex.DecodeString(deviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	udp := &pb.UdpMessage{
+		DeviceId: bytes,
+		Status:   pb.UdpStatus_UDP_STATUS_ONLINE,
+	}
+	data, err := proto.Marshal(udp)
+	if err != nil {
+		panic(err)
+	}
+	buf := proto.NewBuffer(make([]byte, 0))
+	buf.EncodeRawBytes(data)
+
+	for {
+		log.Printf("UDP %v bytes", len(buf.Bytes()))
+		_, err := conn.Write(buf.Bytes())
+		if err != nil {
+			log.Printf("Error: %v", err)
+		}
+		time.Sleep(2 * time.Second)
+	}
 }
 
 func main() {
