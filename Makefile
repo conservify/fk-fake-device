@@ -14,6 +14,9 @@ GOFLAGS ?=
 BUILD ?= $(abspath build)
 BUILDARCH ?= $(BUILD)/$(GOOS)-$(GOARCH)
 
+default:
+	$(MAKE) binaries-all
+
 build:
 	GOOS=linux GOARCH=amd64 $(MAKE) binaries-all
 	GOOS=linux GOARCH=arm $(MAKE) binaries-all
