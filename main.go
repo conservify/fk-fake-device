@@ -360,6 +360,7 @@ func PublishDnsDiscovery(address string, deviceId string) (*net.UDPConn, error) 
 	udp := &pb.UdpMessage{
 		DeviceId: bytes,
 		Status:   pb.UdpStatus_UDP_STATUS_ONLINE,
+		Port:     2380,
 	}
 	data, err := proto.Marshal(udp)
 	if err != nil {

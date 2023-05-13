@@ -10,7 +10,7 @@ require (
 	github.com/drhodes/golorem v0.0.0-20160418191928-ecccc744c2d9 // indirect
 	github.com/efarrer/iothrottler v0.0.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/fieldkit/app-protocol v0.0.0-20210914181453-3c7ec93cd68e
+	github.com/fieldkit/app-protocol v0.0.0-20230512235359-6d36389837f4
 	github.com/fieldkit/atlas-protocol v0.0.0-20210322164304-44588194bf0d // indirect
 	github.com/fieldkit/cloud v0.0.0-20190919194814-025e05412027 // indirect
 	github.com/fieldkit/data-protocol v0.0.0-20210322164336-136b961afd9d
@@ -41,6 +41,7 @@ require (
 	golang.org/x/sys v0.0.0-20190919044723-0c1ff786ef13 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20190920130846-1081e67f6b77 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 )
