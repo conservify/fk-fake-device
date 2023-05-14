@@ -41,6 +41,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position:      2,
 			Name:          "modules.water.temp",
 			Configuration: generateWaterConfiguration(device, 2, true),
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0x12,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -54,6 +59,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position:      0,
 			Name:          "modules.water.ph",
 			Configuration: generateWaterConfiguration(device, 0, true),
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0x09,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -67,6 +77,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position:      1,
 			Name:          "modules.water.ec",
 			Configuration: generateWaterConfiguration(device, 1, true),
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0x10,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -80,6 +95,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position:      3,
 			Name:          "modules.water.do",
 			Configuration: generateWaterConfiguration(device, 3, true),
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0x11,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -93,6 +113,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position:      4,
 			Name:          "modules.water.orp",
 			Configuration: generateWaterConfiguration(device, 4, true),
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0x13,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -106,6 +131,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position: 0xff,
 			Flags:    1,
 			Name:     "modules.diagnostics",
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0xa1,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
@@ -143,6 +173,11 @@ func makeModules(device *FakeDevice) []*pb.ModuleCapabilities {
 			Position: 0xff,
 			Flags:    1,
 			Name:     "modules.random",
+			Header: &pb.ModuleHeader{
+				Manufacturer: 1,
+				Kind:         0xa0,
+				Version:      0,
+			},
 			Sensors: []*pb.SensorCapabilities{
 				&pb.SensorCapabilities{
 					Number:        0,
