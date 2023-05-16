@@ -408,7 +408,7 @@ func main() {
 	}
 
 	dispatcher := NewDispatcher()
-	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryStatus)
+	dispatcher.AddHandler(pb.QueryType_QUERY_STATUS, handleQueryReadings)
 	dispatcher.AddHandler(pb.QueryType_QUERY_TAKE_READINGS, handleQueryTakeReadings)
 	dispatcher.AddHandler(pb.QueryType_QUERY_GET_READINGS, handleQueryReadings)
 	dispatcher.AddHandler(pb.QueryType_QUERY_CONFIGURE, handleConfigure)
