@@ -83,6 +83,8 @@ func (ss *StreamState) Append(body []byte) {
 	ss.Record += 1
 	ss.Time = uint64(time.Now().Unix())
 	ss.Size += uint64(len(body))
+
+	log.Printf("Append reading %v (%v bytes)", ss.Record, ss.Size)
 }
 
 func (ss *StreamState) AppendConfiguration() {
