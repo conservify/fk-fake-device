@@ -13,7 +13,7 @@ require (
 	github.com/fieldkit/app-protocol v0.0.0-20230512235359-6d36389837f4
 	github.com/fieldkit/atlas-protocol v0.0.0-20210322164304-44588194bf0d // indirect
 	github.com/fieldkit/cloud v0.0.0-20190919194814-025e05412027 // indirect
-	github.com/fieldkit/data-protocol v0.0.0-20210322164336-136b961afd9d
+	github.com/fieldkit/data-protocol v0.0.0-20230330165154-efef29694ccd
 	github.com/goadesign/goa v2.0.5+incompatible // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c
@@ -38,7 +38,7 @@ require (
 	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
 	golang.org/x/net v0.0.0-20190918130420-a8b05e9114ab // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
-	golang.org/x/sys v0.0.0-20190919044723-0c1ff786ef13 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20190920130846-1081e67f6b77 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

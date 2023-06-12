@@ -15,9 +15,5 @@ timestamps {
                 sh "make clean ci"
             }
         }
-
-        stage ('archive') {
-            archiveArtifacts "build/*/fake-device"
-        }
     }
 }
