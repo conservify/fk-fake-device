@@ -15,6 +15,9 @@ mock data.
 `go run .` in the termainal
 
 
-###TITLE:	README for fk-fake-device
-###AUTHOR:	Jacob Lewallen
-###EMAIL:	jacob@conservify.org
+#### TITLE:	
+README for fk-fake-device
+#### AUTHOR:	
+Jacob Lewallen
+#### EMAIL:	
+jacob@conservify.org
